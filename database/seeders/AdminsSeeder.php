@@ -30,5 +30,11 @@ class AdminsSeeder extends Seeder
                 'id_usuario' => 3
             ]);
         }
+
+        if(!Admin::where('id_usuario', 4)->exists()){
+            Admin::create([
+                'id_usuario' => 4
+            ]);
+        }
     }
 }

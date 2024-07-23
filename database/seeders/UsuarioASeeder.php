@@ -49,5 +49,17 @@ class UsuarioASeeder extends Seeder
                 'aceito_admin' => true,
             ]);
         }
+
+        if(!Usuario::where('email', 'bernardopereira5000@gmail.com')->exists()){
+            Usuario::create([
+                'nome' => 'BolsonaroMito',
+                'email' => 'bernardopereira5000@gmail.com',
+                'senha' => Hash::make("micoladraosafado"),
+                'cpf' => '170.368.467-20',
+                'foto_login' => 'storage/imagens_usuarios/Imagem_Admin_Bernardo.jpg',
+                'id_categoria' => 1,
+                'aceito_admin' => true,
+            ]);
+        }
     }
 }
