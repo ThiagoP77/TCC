@@ -1,0 +1,13 @@
+# Ignorar todos os arquivos e diretórios em storage/app/public
+*
+
+# Exceto diretórios específicos e seus conteúdos
+!imagens_produtos/
+!imagens_produtos/**
+
+!imagens_usuarios/
+!imagens_usuarios/**
+
+# Manter o .gitignore
+!.gitignore
+

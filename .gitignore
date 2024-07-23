@@ -1,13 +1,25 @@
-/phpunit.cache
-/node_modules
+# Ignorar todos os arquivos e diretórios em public
+/public/*
+
+# Exceto diretórios específicos e seus conteúdos
+!/public/imagens_produtos/
+!/public/imagens_produtos/**
+
+!/public/imagens_usuarios/
+!/public/imagens_usuarios/**
+
+# Ignorar o link simbólico public/storage
+/public/storage
+
+# Ignorar outros diretórios e arquivos
 /public/build
 /public/hot
 
-# Ignorar o diretório public inteiro, exceto o storage
-/public/*
-/public/storage
-
+# Ignorar pastas específicas dentro de storage
 /storage/*.key
+
+# Ignorar outros arquivos e pastas
+/node_modules
 /vendor
 .env
 .env.backup
