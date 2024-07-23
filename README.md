@@ -39,3 +39,7 @@ Para acessar a API, é recomendado utilizar o Insomnia para simular requisiçõe
 ```
 http://127.0.0.1:8000/api/
 ```
+Criação do link simbólico de armazenamento.
+```
+php artisan storage:link
+```
