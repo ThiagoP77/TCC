@@ -1,2 +1,9 @@
-*
-!.gitignore
+# Ignorar arquivos no storage/app/public (exceto arquivos específicos, se necessário)
+storage/app/public/*
+!storage/app/public/.gitignore
+!storage/app/public/*.jpg
+!storage/app/public/*.png
+# Outros arquivos ou extensões conforme necessário
+
+# Ignorar o link simbólico public/storage
+public/storage
