@@ -1,12 +1,21 @@
-/.phpunit.cache
+# Ignorar arquivos de cache e logs
+.phpunit.cache
 /node_modules
 /public/build
 /public/hot
 
-!public/
-/public/storage
+# Ignorar o diretório public e public/storage
+public/
+public/storage
 
+# Não ignorar arquivos específicos em storage/app/public
+!storage/app/public/
+!storage/app/public/**
+
+# Ignorar arquivos específicos no storage
 /storage/*.key
+
+# Ignorar diretórios e arquivos específicos
 /vendor
 .env
 .env.backup

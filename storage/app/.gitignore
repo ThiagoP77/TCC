@@ -1,3 +1,9 @@
+# Ignorar tudo dentro de storage/app
+*
+
+# Exceto o diretório public e seus arquivos
 !public/
 !public/**/
+
+# Não ignorar o próprio arquivo .gitignore
 !.gitignore
