@@ -2,10 +2,15 @@
 *
 
 # Não ignorar arquivos específicos
+!imagens_produtos/
+!imagens_produtos/**
+
+!imagens_usuarios/
+!imagens_usuarios/**
+
 !/*.jpg
 !/*.png
 
 # Ignorar o link simbólico public/storage
 public/storage
 
-#askodaskd

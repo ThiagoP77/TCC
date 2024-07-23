@@ -1,9 +1,14 @@
-# Ignorar tudo dentro de storage/app
+# Ignorar todos os arquivos e diretórios por padrão
 *
 
-# Exceto o diretório public e seus arquivos
+# Exceto os diretórios específicos e seus conteúdos
+!public/imagens_produtos/
+!public/imagens_produtos/**
+
+!public/imagens_usuarios/
+!public/imagens_usuarios/**
+
+# Não ignorar o diretório public e seus conteúdos
 !public/
 !public/**/
-
-# Não ignorar o próprio arquivo .gitignore
 !.gitignore
