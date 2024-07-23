@@ -4,7 +4,7 @@
 /public/hot
 
 !public/
-!/public/storage
+/public/storage
 
 /storage/*.key
 /vendor
@@ -21,3 +21,4 @@ yarn-error.log
 /.fleet
 /.idea
 /.vscode
+
