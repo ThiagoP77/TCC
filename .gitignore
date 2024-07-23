@@ -5,7 +5,7 @@
 
 # Ignorar o diretório public inteiro, exceto o storage
 /public/*
-!/public/storage
+/public/storage
 
 /storage/*.key
 /vendor
