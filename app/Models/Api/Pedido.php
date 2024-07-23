@@ -16,11 +16,13 @@ class Pedido extends Model
         'id_vendedor',
         'id_entregador',
         'id_pagamento',
+        'precisa_troco',
+        'troco',
         'total',
         'endereco_cliente',
         'aceito_vendedor',
         'aceito_entregador',
-        'data_criacao',
+        'status',
     ];
 
     public function cliente()
@@ -46,5 +48,11 @@ class Pedido extends Model
     public function itens()
     {
         return $this->hasMany(ItemPedido::class, 'id_pedido');
+    }
+
+    public function produtos()
+    {
+        return $this->belongsToMany(Produto::class, 'itens_pedidos', 'id_pedido', 'id_produto')
+                    ->withPivot('qtde', 'preco');
     }
 }

@@ -5,21 +5,29 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\DB;
 
+/*
+    Obs. nos formatos:
+        CPF: XXX.XXX.XXX-XX
+        Telefone e Whatsapp: (XX) XXXXX-XXXX
+        CNPJ: XX.XXX.XXX/XXXX-XX
+        Placa: XXX-XXXX
+*/
+
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
+ 
     public function up(): void
     {
         Schema::create('categorias_usuarios', function (Blueprint $table) {
             $table->id();
             $table->string('nome');
+            $table->timestamps();
         });
 
         Schema::create('metodos_pagamentos', function (Blueprint $table) {
             $table->id();
             $table->string('nome');
+            $table->timestamps();
         });
 
         Schema::create('usuarios', function (Blueprint $table) {
@@ -33,6 +41,7 @@ return new class extends Migration
             $table->unsignedBigInteger('id_categoria');
             $table->boolean('aceito_admin')->default(false);
             $table->rememberToken();
+            $table->timestamps();
 
             $table->foreign('id_categoria')->references('id')->on('categorias_usuarios')->onDelete('restrict');
         });
@@ -41,6 +50,7 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('id_usuario');
             $table->char('telefone', 15)->nullable();
+            $table->timestamps();
 
             $table->foreign('id_usuario')->references('id')->on('usuarios')->onDelete('cascade');
         });
@@ -49,6 +59,7 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('id_cliente');
             $table->string('descricao');
+            $table->timestamps();
 
             $table->foreign('id_cliente')->references('id')->on('clientes')->onDelete('cascade');
         });
@@ -60,6 +71,7 @@ return new class extends Migration
             $table->char('whatsapp', 15)->nullable();
             $table->string('endereco');
             $table->char('cnpj', 18)->nullable();
+            $table->timestamps();
 
             $table->foreign('id_usuario')->references('id')->on('usuarios')->onDelete('cascade');
         });
@@ -67,6 +79,7 @@ return new class extends Migration
         Schema::create('admins', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('id_usuario');
+            $table->timestamps();
 
             $table->foreign('id_usuario')->references('id')->on('usuarios')->onDelete('restrict');
         });
@@ -77,6 +90,7 @@ return new class extends Migration
             $table->char('telefone', 15);
             $table->string('tipo_veiculo');
             $table->char('placa', 8);
+            $table->timestamps();
 
             $table->foreign('id_usuario')->references('id')->on('usuarios')->onDelete('cascade');
         });
@@ -90,7 +104,8 @@ return new class extends Migration
             $table->decimal('preco_atual', 10, 2)->check('preco_atual >= 0');
             $table->decimal('desconto', 5, 2)->default(0.00);
             $table->string('imagem_produto')->nullable();
-            $table->unsignedInteger('qtde_estoque')->default(0)->check('qtd_estoque >= 0');;
+            $table->unsignedInteger('qtde_estoque')->default(0)->check('qtd_estoque >= 0');
+            $table->timestamps();
 
             $table->foreign('id_vendedor')->references('id')->on('vendedores')->onDelete('cascade');
         });
@@ -99,6 +114,7 @@ return new class extends Migration
             $table->unsignedBigInteger('id_cliente');
             $table->unsignedBigInteger('id_vendedor');
             $table->tinyInteger('avaliacao')->unsigned()->check('avaliacao >= 0 AND avaliacao <= 5');
+            $table->timestamps();
 
             $table->primary(['id_cliente', 'id_vendedor']);
             $table->foreign('id_cliente')->references('id')->on('clientes')->onDelete('cascade');
@@ -106,14 +122,14 @@ return new class extends Migration
         });
 
         Schema::create('carrinhos', function (Blueprint $table) {
-            $table->id();
             $table->unsignedBigInteger('id_cliente');
             $table->unsignedBigInteger('id_vendedor');
             $table->unsignedBigInteger('id_produto');
             $table->unsignedInteger('qtde')->default(1)->check('qtde >= 0');
             $table->decimal('total', 10, 2)->check('total >= 0');
+            $table->timestamps();
 
-            $table->unique(['id_cliente', 'id_vendedor', 'id_produto']);
+            $table->primary(['id_cliente', 'id_vendedor', 'id_produto']);
 
             $table->foreign('id_cliente')->references('id')->on('clientes')->onDelete('cascade');
             $table->foreign('id_vendedor')->references('id')->on('vendedores')->onDelete('cascade');
@@ -126,11 +142,15 @@ return new class extends Migration
             $table->unsignedBigInteger('id_vendedor');
             $table->unsignedBigInteger('id_entregador')->nullable();
             $table->unsignedBigInteger('id_pagamento');
+            $table->boolean('precisa_troco')->default(false);
+            $table->decimal('troco', 5, 2)->default(0.00);
             $table->decimal('total', 10, 2)->check('total >= 0');
             $table->string('endereco_cliente');
             $table->boolean('aceito_vendedor')->default(false);
             $table->boolean('aceito_entregador')->default(false);
             $table->timestamp('data_criacao')->default(DB::raw('CURRENT_TIMESTAMP'));
+            $table->enum('status', ['pendente', 'aceito pelo vendedor', 'aceito para entrega'])->default('pendente');
+            $table->timestamps();
 
             $table->foreign('id_cliente')->references('id')->on('clientes')->onDelete('cascade');
             $table->foreign('id_vendedor')->references('id')->on('vendedores')->onDelete('cascade');
@@ -139,11 +159,13 @@ return new class extends Migration
         });
 
         Schema::create('itens_pedidos', function (Blueprint $table) {
-            $table->id();
             $table->unsignedBigInteger('id_pedido');
             $table->unsignedBigInteger('id_produto');
-            $table->unsignedInteger('qtde')->default(1)->check('qtde >= 0');;
-            $table->decimal('preco', 10, 2)->check('preco >= 0');;
+            $table->unsignedInteger('qtde')->default(1)->check('qtde >= 0');
+            $table->decimal('preco', 10, 2)->check('preco >= 0');
+            $table->timestamps();
+
+            $table->primary(['id_pedido', 'id_produto']);
 
             $table->foreign('id_pedido')->references('id')->on('pedidos')->onDelete('cascade');
             $table->foreign('id_produto')->references('id')->on('produtos')->onDelete('cascade');

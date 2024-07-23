@@ -36,4 +36,10 @@ class Produto extends Model
     {
         return $this->hasMany(ItemPedido::class, 'id_produto');
     }
+
+    public function pedidos()
+    {
+        return $this->belongsToMany(Pedido::class, 'itens_pedidos', 'id_produto', 'id_pedido')
+                    ->withPivot('qtde', 'preco');
+    }
 }
