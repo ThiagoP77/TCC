@@ -21,7 +21,7 @@ class UsuarioController extends Controller
                 'required',
                 'string',
                 'min:3',
-                'max:100',
+                'max:50',
                 'regex:/^(?=.*\p{L})(?!.*  )[ \p{L}]+$/u'
             ],
 
