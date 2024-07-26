@@ -20,7 +20,7 @@ Route::get('/metodospagamento', [MetodoPagamentoController::class, 'metodosPagam
 
 //Rotas com funções básicas de usuário
 Route::prefix('usuarios')->group(function () {
-    Route::get('/cadastro', [UsuarioController::class, 'cadastro']);//Relizar cadastro de novo usuário
-    Route::get('/login', [UsuarioController::class, 'login']);//Logar no site
-    Route::get('/logout', [UsuarioController::class, 'logout']);//Deslogar do site
+    Route::post('/cadastro', [UsuarioController::class, 'cadastro']);//Relizar cadastro de novo usuário
+    Route::post('/login', [UsuarioController::class, 'login']);//Logar no site
+    Route::delete('/logout', [UsuarioController::class, 'logout']);//Deslogar do site
 });
