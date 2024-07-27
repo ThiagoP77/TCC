@@ -30,6 +30,12 @@ return new class extends Migration
             $table->timestamps();
         });
 
+        Schema::create('tipos_veiculos', function (Blueprint $table) {
+            $table->id();
+            $table->string('nome');
+            $table->timestamps();
+        });
+
         Schema::create('usuarios', function (Blueprint $table) {
             $table->id();
             $table->string('nome');
@@ -37,7 +43,7 @@ return new class extends Migration
             $table->timestamp('email_verified_at')->nullable();
             $table->string('senha');
             $table->char('cpf', 14)->unique();
-            $table->string('foto_login')->nullable();
+            $table->string('foto_login')->nullable()->default('storage/imagens_usuarios/imagem_default_usuario.jpg');
             $table->unsignedBigInteger('id_categoria');
             $table->boolean('aceito_admin')->default(false);
             $table->rememberToken();
@@ -88,10 +94,11 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('id_usuario');
             $table->char('telefone', 15);
-            $table->string('tipo_veiculo');
             $table->char('placa', 8);
+            $table->unsignedBigInteger('id_tipo_veiculo');
             $table->timestamps();
 
+            $table->foreign('id_tipo_veiculo')->references('id')->on('tipos_veiculos')->onDelete('restrict');
             $table->foreign('id_usuario')->references('id')->on('usuarios')->onDelete('cascade');
         });
 

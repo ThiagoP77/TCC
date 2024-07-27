@@ -14,7 +14,7 @@ class Entregador extends Model
     protected $fillable = [
         'id_usuario',
         'telefone',
-        'tipo_veiculo',
+        'id_tipo_veiculo',
         'placa',
     ];
 
@@ -26,5 +26,10 @@ class Entregador extends Model
     public function pedidos()
     {
         return $this->hasMany(Pedido::class, 'id_entregador');
+    }
+
+    public function tipoVeiculo()
+    {
+        return $this->belongsTo(TipoVeiculo::class, 'id_tipo_veiculo');
     }
 }

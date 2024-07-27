@@ -39,6 +39,8 @@ class CpfValidacao implements ValidationRule
             }
         }
 
+        
+
         //Fonte: https://gist.github.com/rafael-neri/ab3e58803a08cb4def059fce4e3c0e40
 
     }
