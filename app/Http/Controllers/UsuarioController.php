@@ -21,7 +21,18 @@ class UsuarioController extends Controller
     
     public function cadastro(Request $r): JsonResponse { 
         //dd($r->url());
-        $validator = Validator::make($r->all(), [
+
+        $requestData = $r->all();
+
+        // Decodifica o JSON do campo 'usuario' para um array associativo
+        $usuarioData = json_decode($requestData['usuario'], true);
+
+        // Verifica se houve algum erro na decodificação do JSON
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            return response()->json(['mensagem' => 'Erro ao processar os dados do usuário.'], 400);
+        }
+
+        $validator = Validator::make($usuarioData, [
             'nome' => [
                 'required',
                 'string',
@@ -69,7 +80,7 @@ class UsuarioController extends Controller
 
         //Cliente
         if($id_categoria == 2) {
-            $validator = Validator::make($r->all(), [
+            $validator = Validator::make($usuarioData, [
                 'telefone' => [
                     'required',
                     'string',
@@ -103,7 +114,7 @@ class UsuarioController extends Controller
 
                 if (isset($dadosValidados['foto_login']) && $r->hasFile('foto_login') && $r->file('foto_login')->isValid()) {
                     $path = $r->file('foto_login')->store('imagens_usuarios', 'public');
-                    $usuario->foto_login = $path;
+                    $usuario->foto_login = 'storage/'.$path;
                 }
 
                 $usuario->save();
@@ -130,7 +141,7 @@ class UsuarioController extends Controller
         
         //Vendedor
         else if ($id_categoria == 3) {
-            $validator = Validator::make($r->all(), [
+            $validator = Validator::make($usuarioData, [
                 'telefone' => [
                     'required',
                     'string',
@@ -183,7 +194,7 @@ class UsuarioController extends Controller
 
                 if ($r->hasFile('foto_login') && $r->file('foto_login')->isValid()) {
                     $path = $r->file('foto_login')->store('imagens_usuarios', 'public');
-                    $usuario->foto_login = $path;
+                    $usuario->foto_login = 'storage/'.$path;
                 }
 
                 $usuario->save();
@@ -213,7 +224,7 @@ class UsuarioController extends Controller
         
         //Entregador
         else if ($id_categoria == 4) {
-            $validator = Validator::make($r->all(), [
+            $validator = Validator::make($usuarioData, [
                 'telefone' => [
                     'required',
                     'string',
@@ -255,7 +266,7 @@ class UsuarioController extends Controller
 
                 if ($r->hasFile('foto_login') && $r->file('foto_login')->isValid()) {
                     $path = $r->file('foto_login')->store('imagens_usuarios', 'public');
-                    $usuario->foto_login = $path;
+                    $usuario->foto_login = 'storage/'.$path;
                 }
 
                 $usuario->save();

@@ -37,13 +37,13 @@ class CnpjValidacao implements ValidationRule
         $digits = array_slice($numbers, 12);
         $digit0 = $this->validCalc(12, $numbers);
         
-        if ($digit0 !== $digits[0]) {
+        if ($digit0 != $digits[0]) {
             $fail("Dígitos verificadores do CNPJ não conferem.");
         }
 
         $digit1 = $this->validCalc(13, $numbers);
 
-        if ($digit1 !== $digits[1]) {
+        if ($digit1 != $digits[1]) {
             $fail("Dígitos verificadores do CNPJ não conferem.");
         }
     }
