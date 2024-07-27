@@ -16,7 +16,7 @@ class CategoriaUsuarioController extends Controller
             return response()->json($cat, 200);
         } catch (Exception $e) {
             return response()->json([
-                'mensagem' => 'Falha ao carregar as categorias.',
+                'mensagem' => 'Falha ao carregar as categorias de usuário.',
                 'erro' => $e->getMessage()
             ], 400);
         }

@@ -254,11 +254,11 @@ class UsuarioController extends Controller
             
                 'placa' => [
                     'required', 
-                    'regex:/^[A-Z]{3}\-\d{4}$/'
+                    'regex:/^[A-Z0-9]{3}-[A-Z0-9]{4}$/'
                 ],
             ], [
                 'telefone.regex' => 'O telefone deve seguir o formato (XX) XXXXX-XXXX.',
-                'placa.regex' => 'A placa deve seguir o formato XXX-XXXX.'
+                'placa.regex' => 'A placa deve seguir o formato XXX-XXXX (letras ou números).'
             ]);
             
             if ($validator->fails()) {

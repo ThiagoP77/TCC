@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\CategoriaUsuarioController;
 use App\Http\Controllers\MetodoPagamentoController;
+use App\Http\Controllers\TipoVeiculoController;
 use App\Http\Controllers\UsuarioController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -17,6 +18,9 @@ Route::get('/categoriasusuario', [CategoriaUsuarioController::class, 'categorias
 
 //Rota para exibir todos os metodos de pagamento (id e nome) ao finalizar o carrinho
 Route::get('/metodospagamento', [MetodoPagamentoController::class, 'metodosPagamentos']);
+
+//Rota para exibir todos os tipos de veiculo
+Route::get('/tiposveiculo', [TipoVeiculoController::class, 'tiposVeiculo']);
 
 //Rotas com funções básicas de usuário
 Route::prefix('usuarios')->group(function () {

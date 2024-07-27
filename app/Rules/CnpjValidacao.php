@@ -3,6 +3,7 @@
 namespace App\Rules;
 
 use Closure;
+use Exception;
 use Illuminate\Contracts\Validation\ValidationRule;
 
 class CnpjValidacao implements ValidationRule
@@ -14,39 +15,44 @@ class CnpjValidacao implements ValidationRule
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        if (empty($value)) {
-            $fail("O CNPJ não pode estar vazio.");
+        try{
+            if (empty($value)) {
+                $fail("O CNPJ não pode estar vazio.");
+            }
+    
+            $validFormat = preg_match('/^\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}$/', $value);
+            if (!$validFormat) {
+                $fail("O CNPJ deve estar no formato XX.XXX.XXX/XXXX-XX.");
+            }
+    
+            $numbers = $this->matchNumbers($value);
+    
+            if (count($numbers) !== 14) {
+                $fail("O CNPJ deve conter exatamente 14 dígitos numéricos.");
+            }
+    
+            $items = array_unique($numbers);
+            if (count($items) === 1) {
+                $fail("O CNPJ não pode ter todos os dígitos iguais.");
+            }
+    
+            $digits = array_slice($numbers, 12);
+            $digit0 = $this->validCalc(12, $numbers);
+            
+            if ($digit0 != $digits[0]) {
+                $fail("Dígitos verificadores do CNPJ não conferem.");
+            }
+    
+            $digit1 = $this->validCalc(13, $numbers);
+    
+            if ($digit1 != $digits[1]) {
+                $fail("Dígitos verificadores do CNPJ não conferem.");
+            }
+        } catch (Exception $e) {
+            $fail("CNPJ inválido inserido.");
         }
-
-        $validFormat = preg_match('/^\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}$/', $value);
-        if (!$validFormat) {
-            $fail("O CNPJ deve estar no formato XX.XXX.XXX/XXXX-XX.");
         }
-
-        $numbers = $this->matchNumbers($value);
-
-        if (count($numbers) !== 14) {
-            $fail("O CNPJ deve conter exatamente 14 dígitos numéricos.");
-        }
-
-        $items = array_unique($numbers);
-        if (count($items) === 1) {
-            $fail("O CNPJ não pode ter todos os dígitos iguais.");
-        }
-
-        $digits = array_slice($numbers, 12);
-        $digit0 = $this->validCalc(12, $numbers);
         
-        if ($digit0 != $digits[0]) {
-            $fail("Dígitos verificadores do CNPJ não conferem.");
-        }
-
-        $digit1 = $this->validCalc(13, $numbers);
-
-        if ($digit1 != $digits[1]) {
-            $fail("Dígitos verificadores do CNPJ não conferem.");
-        }
-    }
 
     private function matchNumbers(string $value): array
     {
