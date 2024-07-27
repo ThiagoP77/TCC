@@ -22,15 +22,25 @@ class UsuarioController extends Controller
     public function cadastro(Request $r): JsonResponse { 
         //dd($r->url());
 
+        if (!$r->has('usuario')) {
+            return response()->json(['mensagem' => 'Campo "usuario" não encontrado na requisição.'], 400);
+        }
+
         $requestData = $r->all();
 
-        // Decodifica o JSON do campo 'usuario' para um array associativo
-        $usuarioData = json_decode($requestData['usuario'], true);
-
-        // Verifica se houve algum erro na decodificação do JSON
-        if (json_last_error() !== JSON_ERROR_NONE) {
-            return response()->json(['mensagem' => 'Erro ao processar os dados do usuário.'], 400);
+        try {
+            // Decodifica o JSON do campo 'usuario' para um array associativo
+            $usuarioData = json_decode($requestData['usuario'], true, 512, JSON_THROW_ON_ERROR);
+    
+            // Verifica se houve algum erro na decodificação do JSON
+            if (json_last_error() != JSON_ERROR_NONE) {
+                return response()->json(['mensagem' => 'Erro ao processar os dados do usuário.'], 400);
+            }
+        } catch (\JsonException $e) {
+            // Captura exceções lançadas ao decodificar o JSON
+            return response()->json(['mensagem' => 'Erro ao processar os dados do usuário.', 'erro' => $e->getMessage()], 400);
         }
+
 
         $validator = Validator::make($usuarioData, [
             'nome' => [
@@ -61,17 +71,24 @@ class UsuarioController extends Controller
                 new CpfValidacao()
             ],
     
-            'foto_login' => 'nullable|image|mimes:jpeg,png,bmp,gif|max:16384'
         ], [
             'id_categoria.in' => 'Tipo de usuário inválido.',
             'nome.regex' => 'Nome não pode conter caracteres especiais.',
             'senha.regex' => 'A senha não pode conter espaços.'
+        ]);
+
+        $validator2 = Validator::make($r->all(), [
+            'foto_login' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:16384'
         ]);
     
         //dd($r->url());
 
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()], 422); 
+        }
+
+        if ($validator2->fails()) {
+            return response()->json(['errors' => $validator2->errors()], 422); 
         }
 
         $dadosValidadosU = $validator->validated();
@@ -112,7 +129,7 @@ class UsuarioController extends Controller
                 $usuario->id_categoria = 2; // Garantir que seja 2
                 $usuario->aceito_admin = true;
 
-                if (isset($dadosValidados['foto_login']) && $r->hasFile('foto_login') && $r->file('foto_login')->isValid()) {
+                if (isset($requestData['foto_login']) && $r->hasFile('foto_login') && $r->file('foto_login')->isValid()) {
                     $path = $r->file('foto_login')->store('imagens_usuarios', 'public');
                     $usuario->foto_login = 'storage/'.$path;
                 }
@@ -192,7 +209,7 @@ class UsuarioController extends Controller
                 $usuario->id_categoria = 3;
                 $usuario->aceito_admin = false;
 
-                if ($r->hasFile('foto_login') && $r->file('foto_login')->isValid()) {
+                if (isset($requestData['foto_login']) && $r->hasFile('foto_login') && $r->file('foto_login')->isValid()) {
                     $path = $r->file('foto_login')->store('imagens_usuarios', 'public');
                     $usuario->foto_login = 'storage/'.$path;
                 }
@@ -230,7 +247,7 @@ class UsuarioController extends Controller
                     'string',
                     'size:15',
                     'regex:/^\(\d{2}\) \d{5}-\d{4}$/',
-                    //new TelWhaValidacao
+                    new TelWhaValidacao
                 ],
             
                 'id_tipo_veiculo' => 'required|integer|in:1,2,3',
@@ -264,7 +281,7 @@ class UsuarioController extends Controller
                 $usuario->id_categoria = 4;
                 $usuario->aceito_admin = false;
 
-                if ($r->hasFile('foto_login') && $r->file('foto_login')->isValid()) {
+                if (isset($requestData['foto_login']) && $r->hasFile('foto_login') && $r->file('foto_login')->isValid()) {
                     $path = $r->file('foto_login')->store('imagens_usuarios', 'public');
                     $usuario->foto_login = 'storage/'.$path;
                 }
