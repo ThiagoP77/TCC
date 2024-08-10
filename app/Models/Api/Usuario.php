@@ -37,6 +37,11 @@ class Usuario extends Authenticatable
             'senha' => 'hashed',
         ];
     }
+
+    public function getAuthPassword()
+    {
+        return $this->senha;
+    }
     
     public function categoria()
     {

@@ -27,8 +27,8 @@ Route::get('/tiposveiculo', [TipoVeiculoController::class, 'tiposVeiculo']);
 //Rotas com funções básicas de usuário
 Route::prefix('usuarios')->group(function () {
     Route::post('/cadastro', [UsuarioController::class, 'cadastro']);//Realizar cadastro de novo usuário
-    Route::post('/login', [UsuarioController::class, 'login']);//Logar no site
-    Route::delete('/logout', [UsuarioController::class, 'logout']);//Deslogar do site
+    Route::post('/login', [UsuarioController::class, 'login'])->name('login');//Logar no site
+    Route::delete('/logout/{id}', [UsuarioController::class, 'logout'])->middleware(['auth:sanctum']);//Deslogar do site
 });
 
 Route::prefix('admins')->group(function () {
@@ -37,3 +37,13 @@ Route::prefix('admins')->group(function () {
     Route::put('/aceitaradmin/{id}', [UsuarioController::class, 'aceitarAdmin']);
     Route::delete('/recusaradmin/{id}', [UsuarioController::class, 'recusarAdmin']);
 });
+
+
+//Modelo de como defender as rotas no final  
+/*
+Route::get('/orders', function () {
+        return response()->json([
+            'message' => 'Deu certo.'
+        ], 200); 
+})->middleware(['auth:sanctum', 'abilities:admin']);
+*/

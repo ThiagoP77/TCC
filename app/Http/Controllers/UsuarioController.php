@@ -12,8 +12,10 @@ use App\Rules\CnpjValidacao;
 use App\Rules\CpfValidacao;
 use App\Rules\TelWhaValidacao;
 use Exception;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
@@ -451,11 +453,108 @@ class UsuarioController extends Controller
         }
     }
 
-    public function login(){
+    public function login(Request $r): JsonResponse{
         
+        try {
+
+            $r->validate([
+                'email' => 'required|email',
+    
+                'senha' => [
+                    'required',
+                    'string',
+                    'min:8',
+                    'regex:/^\S*$/'
+                ],
+            ]);
+
+            $credentials = [
+                'email' => $r->input('email'),
+                'password' => $r->input('senha')
+            ];
+
+            if (Auth::attempt($credentials)) {
+
+                $user = Auth::user();
+                
+                $hab = null;
+
+                $caminho = null;
+
+                if ($user->id_categoria == 1) {
+                    $caminho = '/admins';
+                    $hab = 'admin';
+                } elseif ($user->id_categoria == 2) {
+                    $caminho = '/clientes';
+                    $hab = 'cliente';
+                } else if ($user->id_categoria == 3) {
+                    $caminho = '/vendedores';
+                    $hab = 'vendedor';
+                } else if ($user->id_categoria == 4) {
+                    $caminho = '/entregadores';
+                    $hab = 'entregador';
+                } else {
+
+                    return response()->json([
+                        'message' => 'Usuário inválido.'
+                    ], 404);
+
+                }
+
+                $token = $r->user()->createToken('token', [$hab])->plainTextToken;
+
+                return response()->json([
+                    'message' => true,
+                    'caminho' => $caminho,
+                    'id' => $user->id,
+                    'token' => $token
+                ], 200);
+                
+            } else {
+
+                return response()->json([
+                    'message' => 'Email ou senha incorretos.'
+                ], 404);
+
+            }
+
+        } catch (Exception $e) {
+
+            return response()->json([
+                'mensagem' => 'Falha ao logar.',
+                'erro' => $e->getMessage()
+            ], 400);
+
+        }
+
     }
 
-    public function logout(){
+
+    public function logout($id): JsonResponse{
+
+        try {
+
+            $u = Usuario::findOrFail($id);
+
+            $u->tokens()->delete();
+
+            return response()->json([
+                'mensagem' => 'Deslogado com sucesso.',
+            ], 200);
+
+        } catch (ModelNotFoundException $e) {
+            return response()->json([
+                'error' => 'Usuário não encontrado.',
+            ], 404);
+
+        } catch (Exception $e) {
+
+            return response()->json([
+                'mensagem' => 'Falha ao deslogar.',
+                'erro' => $e->getMessage()
+            ], 400);
+
+        }
         
     }
 
