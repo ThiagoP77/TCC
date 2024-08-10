@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\AceitoAEvent;
+use App\Events\RecusadoAEvent;
 use App\Models\Api\Cliente;
 use App\Models\Api\Entregador;
 use App\Models\Api\Usuario;
@@ -14,6 +16,8 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
 class UsuarioController extends Controller
@@ -312,6 +316,138 @@ class UsuarioController extends Controller
             return response()->json([
                 'mensagem' => 'Erro ao cadastrar usuário.'
             ], 400);
+        }
+    }
+
+    public function aceitarAdmin($id) {
+        try {
+            if (!is_numeric($id) || !Usuario::where('id', $id)->exists()) {
+                return response()->json([
+                    'message' => 'Usuário não encontrado.'
+                ], 404);
+            }
+    
+            $u = Usuario::find($id);
+
+            if ($u->id_categoria !== 3 && $u->id_categoria !== 4) {
+                return response()->json([
+                    'message' => 'O usuário não pode ser aceito porque não é vendedor e nem entregador.'
+                ], 403);
+            }
+
+            if ($u->aceito_admin === 1) {
+                return response()->json([
+                    'message' => 'O usuário já está ativo, não pode ser recusado.'
+                ], 403);
+            }
+    
+            if ($u) {
+                $nome = $u->nome;
+                $email = $u->email;
+
+                $u->aceito_admin = true;
+                $u->save();
+
+                if ($u->id_categoria == 3) {
+                    $funcao = "vendedor";
+                    event(new AceitoAEvent($email, $nome, $funcao));
+                } elseif ($u->id_categoria == 4) {
+                    $funcao = "entregador";
+                    event(new AceitoAEvent($email, $nome, $funcao));
+                }
+    
+                return response()->json([
+                    'message' => 'Usuário aceito com sucesso.'
+                ], 200);
+                
+            } else {
+
+                return response()->json([
+                    'message' => 'Usuário não encontrado.'
+                ], 404);
+
+            }
+
+        } catch (Exception $e) {
+
+            return response()->json([
+                'mensagem' => 'Falha ao aceitar usuário.',
+                'erro' => $e->getMessage()
+            ], 400);
+
+        }
+         
+    }
+
+    public function recusarAdmin($id) {
+        try {
+            if (!is_numeric($id) || !Usuario::where('id', $id)->exists()) {
+                return response()->json([
+                    'message' => 'Usuário não encontrado.'
+                ], 404);
+            }
+    
+            $u = Usuario::find($id);
+
+            $idCategoria = $u->id_categoria;
+            $fotoURL = $u->foto_login;
+            $nome = $u->nome;
+            $email = $u->email;
+
+            if (($idCategoria !== 3 && $idCategoria !== 4)) {
+                return response()->json([
+                    'message' => 'O usuário não pode ser recusado.'
+                ], 403);
+            }
+
+            if ($u->aceito_admin === 1) {
+                return response()->json([
+                    'message' => 'O usuário já está ativo, não pode ser recusado.'
+                ], 403);
+            }
+
+            $defaultURL = 'storage/imagens_usuarios/imagem_default_usuario.jpg';
+
+            if ($u->delete()) {
+                if ($fotoURL && $fotoURL !== $defaultURL) {
+
+                    $p = str_replace('storage/', '', $fotoURL);
+
+                    if (Storage::disk('public')->exists($p)) {
+                        Storage::disk('public')->delete($p);
+                    }
+
+                }
+
+                if ($u->id_categoria == 3) {
+                    $funcao = "vendedor";
+                    event(new RecusadoAEvent($email, $nome, $funcao));
+                } elseif ($u->id_categoria == 4) {
+                    $funcao = "entregador";
+                    event(new RecusadoAEvent($email, $nome, $funcao));
+                }
+    
+                $u->delete();
+
+                return response()->json([
+                    'message' => 'Usuário recusado com sucesso.'
+                ], 200);
+
+            } else {
+
+                return response()->json([
+                    'message' => 'Usuário não encontrado.'
+                ], 404);
+
+            }
+
+        } catch (Exception $e) {
+
+            return response()->json([
+                'mensagem' => 'Falha ao recusar usuário.',
+                'erro' => $e->getMessage()
+            ], 400);
+
         }
     }
 
