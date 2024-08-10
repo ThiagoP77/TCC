@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Events\AceitoAEvent;
 use App\Events\RecusadoAEvent;
+use App\Mail\EsqueceuSenhaMail;
 use App\Models\Api\Cliente;
 use App\Models\Api\Entregador;
 use App\Models\Api\Usuario;
@@ -11,6 +12,8 @@ use App\Models\Api\Vendedor;
 use App\Rules\CnpjValidacao;
 use App\Rules\CpfValidacao;
 use App\Rules\TelWhaValidacao;
+use App\Service\ValidarCodigoService;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
@@ -556,6 +559,173 @@ class UsuarioController extends Controller
 
         }
         
+    }
+
+    public function esqueceuSenha(Request $r) {
+
+        try {
+            $r->validate([
+                'email' => 'required|email'
+                ],
+            );
+
+            $u = Usuario::where('email', $r->email)->first();
+
+            if (!$u) {
+                return response()->json([
+                    'error' => 'Email não registrado.',
+                ], 404);
+            }
+
+            try {
+
+                $senhaReset = DB::table('password_reset_tokens')->where([
+                    ['email', $r->email]
+                ]);
+
+                if($senhaReset){
+                    $senhaReset->delete();
+                }
+
+                $code = mt_rand(100000, 999999);
+
+                $token = Hash::make($code);
+
+                $novaSenhaReset = DB::table('password_reset_tokens')->insert([
+                    'email' => $r->email,
+                    'token' => $token,
+                    'created_at' => Carbon::now()
+                ]);
+
+                if ($novaSenhaReset) {
+
+                    $currentDate = Carbon::now();
+    
+                    $oneHourLater = $currentDate->addHour();
+    
+                    $formattedTime = $oneHourLater->format('H:i');
+                    $formattedDate = $oneHourLater->format('d/m/Y');
+    
+                    Mail::to($u->email)->send(new EsqueceuSenhaMail($u, $code, $formattedDate, $formattedTime));
+                }
+
+                return response()->json([
+                    'message' => 'Enviado e-mail com instruções para recuperar a senha. Acesse a sua caixa de e-mail para recuperar a senha!',
+                ], 200);
+
+            } catch (Exception $e) {
+                return response()->json([
+                    'mensagem' => 'Falha ao recuperar senha.',
+                    'erro' => $e->getMessage()
+                ], 400);
+            }
+        } catch (Exception $e) {
+            return response()->json([
+                'mensagem' => 'Falha ao recuperar senha.',
+                'erro' => $e->getMessage()
+            ], 400);
+        }
+    }
+
+    public function validarCodigo(Request $r, ValidarCodigoService $tokensReset) {
+        try{
+
+            $r->validate([
+                'email' => 'required|email',
+                'code' => 'required'
+                ],
+            );
+
+            $valid = $tokensReset->validarCodigo($r->email, $r->code);
+
+            if(!$valid['status']){
+                return response()->json([
+                    'message' => $valid['message'],
+                ], 400);
+            }
+
+            $user = Usuario::where('email', $r->email)->first();
+
+            if(!$user){
+                
+                return response()->json([
+                    'message' => 'Usuário não encontrado!',
+                ], 400);
+
+            }
+
+            return response()->json([
+                'message' => 'Código válido!',
+            ], 200);
+
+        } catch (Exception $e){
+
+            return response()->json([
+                'erro' => $e->getMessage()
+            ], 400);
+        }
+    }
+
+    public function resetarSenha(Request $r, ValidarCodigoService $tokensReset) {
+        try{
+            $r->validate([
+                'email' => 'required|email',
+
+                'code' => 'required',
+
+                'senha' => [
+                    'required',
+                    'string',
+                    'confirmed',
+                    'min:8',
+                    'regex:/^\S*$/'
+                    ],
+                ],
+            );
+
+            $valid = $tokensReset->validarCodigo($r->email, $r->code);
+
+            if(!$valid['status']){
+                
+                return response()->json([
+                    'message' => $valid['message'],
+                ], 400);
+
+            }
+
+            $u = Usuario::where('email', $r->email)->first();
+
+            if(!$u){
+
+                return response()->json([
+                    'message' => 'Usuário não encontrado!',
+                ], 400);
+
+            }
+
+            $u->update([
+                'senha' => Hash::make($r->senha)
+            ]);
+
+            $resetarSenha = DB::table('password_reset_tokens')->where('email', $r->email);
+
+            if($resetarSenha){
+                $resetarSenha->delete();
+            }
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Senha atualizada com sucesso!',
+            ], 200);
+
+
+        } catch (Exception $e){
+
+            return response()->json([
+                'message' => 'Não foi possível alterar senha.',
+                'erro' => $e->getMessage()
+            ], 400);
+        }
     }
 
 }

@@ -7,6 +7,7 @@
 
 Duplicar o arquivo ".env.example" e nomear para ".env" <br>
 Alterar no arquivo ".env" as credenciais do banco de dados <br>
+Criar banco de dados chamado "tcc" <br>
 
 Instalar as dependências do PHP
 ```

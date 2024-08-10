@@ -29,6 +29,9 @@ Route::prefix('usuarios')->group(function () {
     Route::post('/cadastro', [UsuarioController::class, 'cadastro']);//Realizar cadastro de novo usuário
     Route::post('/login', [UsuarioController::class, 'login'])->name('login');//Logar no site
     Route::delete('/logout/{id}', [UsuarioController::class, 'logout'])->middleware(['auth:sanctum']);//Deslogar do site
+    Route::post('/esqueceu-senha', [UsuarioController::class, 'esqueceuSenha']);//Realizar cadastro de novo usuário
+    Route::post('/validar-codigo', [UsuarioController::class, 'validarCodigo']);//Realizar cadastro de novo usuário
+    Route::post('/resetar-senha', [UsuarioController::class, 'resetarSenha']);//Realizar cadastro de novo usuário
 });
 
 Route::prefix('admins')->group(function () {
