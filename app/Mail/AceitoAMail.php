@@ -13,8 +13,8 @@ class AceitoAMail extends Mailable
 {
     use Queueable, SerializesModels;
 
-    protected $nome;
-    protected $funcao;
+    public $nome;
+    public $funcao;
 
     /**
      * Create a new message instance.
@@ -31,7 +31,7 @@ class AceitoAMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Aceito A Mail',
+            subject: 'Aceito - LA Doceria',
         );
     }
 

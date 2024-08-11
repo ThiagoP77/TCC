@@ -7,6 +7,7 @@ use App\Mail\AceitoAMail;
 use Exception;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
 class AceitoAListener
@@ -27,7 +28,7 @@ class AceitoAListener
         try {
             Mail::to($event->email)->send(new AceitoAMail($event->nome, $event->funcao));
         } catch (Exception $e) {
-            
+            Log::error($e);
         }
     }
 }

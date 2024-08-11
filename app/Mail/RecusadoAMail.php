@@ -13,8 +13,8 @@ class RecusadoAMail extends Mailable
 {
     use Queueable, SerializesModels;
     
-    protected $nome;
-    protected $funcao;
+    public $nome;
+    public $funcao;
 
     /**
      * Create a new message instance.

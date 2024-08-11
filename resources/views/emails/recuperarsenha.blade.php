@@ -10,7 +10,7 @@
 
 <body>
 
-    <p>Prezado(a) {{$u->name}}</p>
+    <p>Prezado(a) {{$u->nome}}</p>
 
     <p>Para recuperar a sua senha do app LA Doceria, use o código de verificação abaixo:</p>
 

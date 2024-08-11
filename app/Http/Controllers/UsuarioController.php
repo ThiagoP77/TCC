@@ -24,6 +24,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use App\Mail\AceitoAMail;
 
 class UsuarioController extends Controller
 {
@@ -456,13 +457,11 @@ class UsuarioController extends Controller
         }
     }
 
-    public function login(Request $r): JsonResponse{
-        
+    public function login(Request $r): JsonResponse
+    {
         try {
-
-            $r->validate([
+            $validator = Validator::make($r->all(), [
                 'email' => 'required|email',
-    
                 'senha' => [
                     'required',
                     'string',
@@ -470,42 +469,49 @@ class UsuarioController extends Controller
                     'regex:/^\S*$/'
                 ],
             ]);
-
+    
+            if ($validator->fails()) {
+                return response()->json([
+                    'errors' => $validator->errors()
+                ], 422);
+            }
+    
             $credentials = [
                 'email' => $r->input('email'),
                 'password' => $r->input('senha')
             ];
-
+    
             if (Auth::attempt($credentials)) {
-
                 $user = Auth::user();
                 
                 $hab = null;
-
                 $caminho = null;
-
-                if ($user->id_categoria == 1) {
-                    $caminho = '/admins';
-                    $hab = 'admin';
-                } elseif ($user->id_categoria == 2) {
-                    $caminho = '/clientes';
-                    $hab = 'cliente';
-                } else if ($user->id_categoria == 3) {
-                    $caminho = '/vendedores';
-                    $hab = 'vendedor';
-                } else if ($user->id_categoria == 4) {
-                    $caminho = '/entregadores';
-                    $hab = 'entregador';
-                } else {
-
-                    return response()->json([
-                        'message' => 'Usuário inválido.'
-                    ], 404);
-
+    
+                switch ($user->id_categoria) {
+                    case 1:
+                        $caminho = '/admins';
+                        $hab = 'admin';
+                        break;
+                    case 2:
+                        $caminho = '/clientes';
+                        $hab = 'cliente';
+                        break;
+                    case 3:
+                        $caminho = '/vendedores';
+                        $hab = 'vendedor';
+                        break;
+                    case 4:
+                        $caminho = '/entregadores';
+                        $hab = 'entregador';
+                        break;
+                    default:
+                        return response()->json([
+                            'message' => 'Usuário inválido.'
+                        ], 404);
                 }
-
+    
                 $token = $r->user()->createToken('token', [$hab])->plainTextToken;
-
+    
                 return response()->json([
                     'message' => true,
                     'caminho' => $caminho,
@@ -514,22 +520,17 @@ class UsuarioController extends Controller
                 ], 200);
                 
             } else {
-
                 return response()->json([
                     'message' => 'Email ou senha incorretos.'
                 ], 404);
-
             }
-
+    
         } catch (Exception $e) {
-
             return response()->json([
                 'mensagem' => 'Falha ao logar.',
                 'erro' => $e->getMessage()
             ], 400);
-
         }
-
     }
 
 
@@ -561,15 +562,20 @@ class UsuarioController extends Controller
         
     }
 
-    public function esqueceuSenha(Request $r) {
-
+    public function esqueceuSenha(Request $r): JsonResponse{
+    
         try {
-            $r->validate([
+            $validator = Validator::make($r->all(), [
                 'email' => 'required|email'
-                ],
-            );
+            ]);
 
-            $u = Usuario::where('email', $r->email)->first();
+            if ($validator->fails()) {
+                return response()->json([
+                    'errors' => $validator->errors()
+                ], 422);
+            }
+
+            $u = Usuario::where('email', $r->input('email'))->first();
 
             if (!$u) {
                 return response()->json([
@@ -578,12 +584,11 @@ class UsuarioController extends Controller
             }
 
             try {
-
                 $senhaReset = DB::table('password_reset_tokens')->where([
-                    ['email', $r->email]
+                    ['email', $r->input('email')]
                 ]);
 
-                if($senhaReset){
+                if ($senhaReset->exists()) {
                     $senhaReset->delete();
                 }
 
@@ -592,20 +597,17 @@ class UsuarioController extends Controller
                 $token = Hash::make($code);
 
                 $novaSenhaReset = DB::table('password_reset_tokens')->insert([
-                    'email' => $r->email,
+                    'email' => $r->input('email'),
                     'token' => $token,
                     'created_at' => Carbon::now()
                 ]);
 
                 if ($novaSenhaReset) {
-
                     $currentDate = Carbon::now();
-    
                     $oneHourLater = $currentDate->addHour();
-    
                     $formattedTime = $oneHourLater->format('H:i');
                     $formattedDate = $oneHourLater->format('d/m/Y');
-    
+
                     Mail::to($u->email)->send(new EsqueceuSenhaMail($u, $code, $formattedDate, $formattedTime));
                 }
 
@@ -625,41 +627,42 @@ class UsuarioController extends Controller
                 'erro' => $e->getMessage()
             ], 400);
         }
-    }
+}
 
     public function validarCodigo(Request $r, ValidarCodigoService $tokensReset) {
-        try{
-
-            $r->validate([
+        try {
+            $validator = Validator::make($r->all(), [
                 'email' => 'required|email',
                 'code' => 'required'
-                ],
-            );
-
-            $valid = $tokensReset->validarCodigo($r->email, $r->code);
-
-            if(!$valid['status']){
+            ]);
+    
+            if ($validator->fails()) {
+                return response()->json([
+                    'errors' => $validator->errors()
+                ], 422);
+            }
+    
+            $valid = $tokensReset->validarCodigo($r->input('email'), $r->input('code'));
+    
+            if (!$valid['status']) {
                 return response()->json([
                     'message' => $valid['message'],
                 ], 400);
             }
-
-            $user = Usuario::where('email', $r->email)->first();
-
-            if(!$user){
-                
+    
+            $user = Usuario::where('email', $r->input('email'))->first();
+    
+            if (!$user) {
                 return response()->json([
                     'message' => 'Usuário não encontrado!',
                 ], 400);
-
             }
-
+    
             return response()->json([
                 'message' => 'Código válido!',
             ], 200);
-
-        } catch (Exception $e){
-
+    
+        } catch (Exception $e) {
             return response()->json([
                 'erro' => $e->getMessage()
             ], 400);
@@ -667,62 +670,60 @@ class UsuarioController extends Controller
     }
 
     public function resetarSenha(Request $r, ValidarCodigoService $tokensReset) {
-        try{
-            $r->validate([
+        try {
+            $validator = Validator::make($r->all(), [
                 'email' => 'required|email',
-
                 'code' => 'required',
-
                 'senha' => [
                     'required',
                     'string',
                     'confirmed',
                     'min:8',
                     'regex:/^\S*$/'
-                    ],
                 ],
-            );
-
-            $valid = $tokensReset->validarCodigo($r->email, $r->code);
-
-            if(!$valid['status']){
-                
+            ]);
+    
+            if ($validator->fails()) {
+                return response()->json([
+                    'message' => 'Validação falhou.',
+                    'errors' => $validator->errors()
+                ], 422);
+            }
+    
+            $valid = $tokensReset->validarCodigo($r->input('email'), $r->input('code'));
+    
+            if (!$valid['status']) {
                 return response()->json([
                     'message' => $valid['message'],
                 ], 400);
-
             }
-
-            $u = Usuario::where('email', $r->email)->first();
-
-            if(!$u){
-
+    
+            $u = Usuario::where('email', $r->input('email'))->first();
+    
+            if (!$u) {
                 return response()->json([
                     'message' => 'Usuário não encontrado!',
                 ], 400);
-
             }
-
+    
             $u->update([
-                'senha' => Hash::make($r->senha)
+                'senha' => Hash::make($r->input('senha'))
             ]);
-
-            $resetarSenha = DB::table('password_reset_tokens')->where('email', $r->email);
-
-            if($resetarSenha){
+    
+            $resetarSenha = DB::table('password_reset_tokens')->where('email', $r->input('email'));
+    
+            if ($resetarSenha->exists()) {
                 $resetarSenha->delete();
             }
-
+    
             return response()->json([
                 'status' => true,
                 'message' => 'Senha atualizada com sucesso!',
             ], 200);
-
-
-        } catch (Exception $e){
-
+    
+        } catch (Exception $e) {
             return response()->json([
-                'message' => 'Não foi possível alterar senha.',
+                'message' => 'Não foi possível alterar a senha.',
                 'erro' => $e->getMessage()
             ], 400);
         }

@@ -14,18 +14,22 @@ class AceitoAEvent
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
+    
     public $email;
     public $nome;
     public $funcao;
+    
 
     /**
      * Create a new event instance.
      */
-    public function __construct($email, $nome, $funcao)
+    public function __construct( $email,  $nome,  $funcao)
     {
+        
         $this->email = $email;
         $this->nome = $nome;
         $this->funcao = $funcao;
+        
     }
 
     /**
