@@ -475,6 +475,18 @@ class UsuarioController extends Controller
                     'errors' => $validator->errors()
                 ], 422);
             }
+
+            $u = Usuario::where('email', $r->input('email'))->first();
+
+            if ($u->id_categoria == 3 || $u->id_categoria == 4){
+                if ($u->aceito_admin == 0) {
+
+                    return response()->json([
+                        'mensagem' => 'Login não permitido. Seu usuário ainda não foi aceito no sistema!',
+                    ], 400);
+
+                }
+            }
     
             $credentials = [
                 'email' => $r->input('email'),
@@ -579,7 +591,7 @@ class UsuarioController extends Controller
 
             if (!$u) {
                 return response()->json([
-                    'error' => 'Email não registrado.',
+                    'error' => 'Email não registrado no sistema.',
                 ], 404);
             }
 
@@ -592,9 +604,9 @@ class UsuarioController extends Controller
                     $senhaReset->delete();
                 }
 
-                $code = mt_rand(100000, 999999);
+                $codigo = mt_rand(100000, 999999);
 
-                $token = Hash::make($code);
+                $token = Hash::make($codigo);
 
                 $novaSenhaReset = DB::table('password_reset_tokens')->insert([
                     'email' => $r->input('email'),
@@ -603,27 +615,27 @@ class UsuarioController extends Controller
                 ]);
 
                 if ($novaSenhaReset) {
-                    $currentDate = Carbon::now();
-                    $oneHourLater = $currentDate->addHour();
-                    $formattedTime = $oneHourLater->format('H:i');
-                    $formattedDate = $oneHourLater->format('d/m/Y');
+                    $dataAtual = Carbon::now();
+                    $dataMaisHora = $dataAtual->addHour();
+                    $tempo = $dataMaisHora->format('H:i');
+                    $data = $dataMaisHora->format('d/m/Y');
 
-                    Mail::to($u->email)->send(new EsqueceuSenhaMail($u, $code, $formattedDate, $formattedTime));
+                    Mail::to($u->email)->send(new EsqueceuSenhaMail($u, $codigo, $data, $tempo));
                 }
 
                 return response()->json([
-                    'message' => 'Enviado e-mail com instruções para recuperar a senha. Acesse a sua caixa de e-mail para recuperar a senha!',
+                    'message' => 'Enviado e-mail com instruções para recuperar a senha!',
                 ], 200);
 
             } catch (Exception $e) {
                 return response()->json([
-                    'mensagem' => 'Falha ao recuperar senha.',
+                    'mensagem' => 'Falha ao recuperar a senha.',
                     'erro' => $e->getMessage()
                 ], 400);
             }
         } catch (Exception $e) {
             return response()->json([
-                'mensagem' => 'Falha ao recuperar senha.',
+                'mensagem' => 'Falha ao recuperar a senha.',
                 'erro' => $e->getMessage()
             ], 400);
         }
@@ -633,7 +645,7 @@ class UsuarioController extends Controller
         try {
             $validator = Validator::make($r->all(), [
                 'email' => 'required|email',
-                'code' => 'required'
+                'codigo' => 'required|size:6'
             ]);
     
             if ($validator->fails()) {
@@ -642,7 +654,7 @@ class UsuarioController extends Controller
                 ], 422);
             }
     
-            $valid = $tokensReset->validarCodigo($r->input('email'), $r->input('code'));
+            $valid = $tokensReset->validarCodigo($r->input('email'), $r->input('codigo'));
     
             if (!$valid['status']) {
                 return response()->json([
@@ -650,9 +662,9 @@ class UsuarioController extends Controller
                 ], 400);
             }
     
-            $user = Usuario::where('email', $r->input('email'))->first();
+            $u = Usuario::where('email', $r->input('email'))->first();
     
-            if (!$user) {
+            if (!$u) {
                 return response()->json([
                     'message' => 'Usuário não encontrado!',
                 ], 400);
@@ -673,7 +685,7 @@ class UsuarioController extends Controller
         try {
             $validator = Validator::make($r->all(), [
                 'email' => 'required|email',
-                'code' => 'required',
+                'codigo' => 'required|size:6',
                 'senha' => [
                     'required',
                     'string',
@@ -690,7 +702,7 @@ class UsuarioController extends Controller
                 ], 422);
             }
     
-            $valid = $tokensReset->validarCodigo($r->input('email'), $r->input('code'));
+            $valid = $tokensReset->validarCodigo($r->input('email'), $r->input('codigo'));
     
             if (!$valid['status']) {
                 return response()->json([

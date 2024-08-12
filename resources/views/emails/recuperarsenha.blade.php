@@ -10,13 +10,13 @@
 
 <body>
 
-    <p>Prezado(a) {{$u->nome}}</p>
+    <p>Prezado(a) {{$u->nome}},</p>
 
     <p>Para recuperar a sua senha do app LA Doceria, use o código de verificação abaixo:</p>
 
-    <p>{{ $code }}</p>
+    <p>{{ $codigo }}</p>
 
-    <p>Por questões de segurança esse código é válido somente até as {{ $formattedTime }} do dia {{ $formattedDate }}. Caso esse prazo esteja expirado, será necessário solicitar outro código.</p>
+    <p>Por questões de segurança esse código é válido somente até as {{ $data }} do dia {{ $tempo }}. Caso esse prazo esteja expirado, será necessário solicitar outro código.</p>
 
 </body>
 

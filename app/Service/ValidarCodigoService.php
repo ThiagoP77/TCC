@@ -9,14 +9,12 @@ use Illuminate\Support\Facades\Hash;
 class ValidarCodigoService
 {
 
-    public function validarCodigo($email, $code): array
+    public function validarCodigo($email, $codigo): array
     {
 
         $tokensReset = DB::table('password_reset_tokens')->where('email', $email)->first();
 
-        // Verificar se encontrou o usuário no banco de dados com token de redefinição de senha
         if(!$tokensReset){
-
             return [
                 'status' => false,
                 'message' => 'Código não encontrado!',
@@ -24,7 +22,7 @@ class ValidarCodigoService
         }
 
 
-        if(!Hash::check($code, $tokensReset->token)){
+        if(!Hash::check($codigo, $tokensReset->token)){
 
             return [
                 'status' => false,

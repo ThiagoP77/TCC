@@ -34,7 +34,7 @@ Route::prefix('usuarios')->group(function () {
     Route::post('/resetar-senha', [UsuarioController::class, 'resetarSenha']);//Realizar cadastro de novo usuário
 });
 
-Route::prefix('admins')->group(function () {
+Route::prefix('admins')->middleware(['auth:sanctum', 'abilities:admin'])->group(function () {
     Route::get('/entregadoresAguardando', [EntregadorController::class, 'entregadoresAguardandoAceitar']);
     Route::get('/vendedoresAguardando', [VendedorController::class, 'vendedoresAguardandoAceitar']);
     Route::put('/aceitaradmin/{id}', [UsuarioController::class, 'aceitarAdmin']);
@@ -48,5 +48,5 @@ Route::get('/orders', function () {
         return response()->json([
             'message' => 'Deu certo.'
         ], 200); 
-})->middleware(['auth:sanctum', 'abilities:admin']);
+})->middleware(['auth:sanctum', 'abilities:entregador']);
 */

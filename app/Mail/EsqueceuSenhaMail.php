@@ -16,7 +16,7 @@ class EsqueceuSenhaMail extends Mailable
     /**
      * Create a new message instance.
      */
-    public function __construct(public $u, public $code, public $formattedDate, public $formattedTime)
+    public function __construct(public $u, public $codigo, public $data, public $tempo)
     {
         //
     }
