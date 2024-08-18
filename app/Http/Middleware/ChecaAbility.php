@@ -1,7 +1,9 @@
 <?php
 
+//Namespace
 namespace App\Http\Middleware;
 
+//Namespaces utilizados
 use App\Exceptions\AbilityException;
 use Closure;
 use Illuminate\Http\Request;
@@ -9,18 +11,11 @@ use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Auth\AuthenticationException;
 use Laravel\Sanctum\Exceptions\MissingAbilityException;
 
+//Classe que realiza a verificação das abilties de um token
 class ChecaAbility
 {
-    /**
-     * Handle the incoming request.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \Closure  $next
-     * @param  mixed  ...$abilities
-     * @return \Illuminate\Http\Response
-     *
-     * @throws \Illuminate\Auth\AuthenticationException|\Laravel\Sanctum\Exceptions\MissingAbilityException
-     */
+    
+    //Obs.: Função feita pelo próprio Laravel, apenas substitui a Exceção lançada para realizar tratamento personalizado
     public function handle($request, $next, ...$abilities)
     {
         if (! $request->user() || ! $request->user()->currentAccessToken()) {

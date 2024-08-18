@@ -1,4 +1,7 @@
 <!DOCTYPE html>
+
+<!-- Design do email enviado ao vendedor ou entregador quando aceitos no site -->
+
 <html lang="pt-br">
 
 <head>

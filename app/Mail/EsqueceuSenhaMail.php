@@ -1,7 +1,9 @@
 <?php
 
+//Namespace
 namespace App\Mail;
 
+//Namespaces utilizados
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
@@ -9,31 +11,26 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
+//Classe de email de aceitação de usuário
 class EsqueceuSenhaMail extends Mailable
 {
     use Queueable, SerializesModels;
 
-    /**
-     * Create a new message instance.
-     */
+    //Metodo construtor com os elementos necessários
     public function __construct(public $u, public $codigo, public $data, public $tempo)
     {
         //
     }
 
-    /**
-     * Get the message envelope.
-     */
+    //Função com o assunto do email
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Recuperar a senha do LA Doceria',
+            subject: 'Recuperar Senha - LA Doceria',
         );
     }
 
-    /**
-     * Get the message content definition.
-     */
+    //Função que determina a view correspondente ao conteúdo deste email
     public function content(): Content
     {
         return new Content(
@@ -41,11 +38,6 @@ class EsqueceuSenhaMail extends Mailable
         );
     }
 
-    /**
-     * Get the attachments for the message.
-     *
-     * @return array<int, \Illuminate\Mail\Mailables\Attachment>
-     */
     public function attachments(): array
     {
         return [];

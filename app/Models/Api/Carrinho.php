@@ -1,17 +1,20 @@
 <?php
 
+//Namespace
 namespace App\Models\Api;
 
+//Namespaces utilizados
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+//Classe modelo de carrinhos
 class Carrinho extends Model
 {
     use HasFactory;
 
-    protected $table = 'carrinhos';
+    protected $table = 'carrinhos';//Representa essa tabela
 
-    protected $fillable = [
+    protected $fillable = [//Campos que podem ser preenchidos
         'id_cliente',
         'id_vendedor',
         'id_produto',
@@ -19,17 +22,17 @@ class Carrinho extends Model
         'total',
     ];
 
-    public function cliente()
+    public function cliente()//Estabelecimento de relacionamento com tabela "clientes"
     {
         return $this->belongsTo(Cliente::class, 'id_cliente');
     }
 
-    public function vendedor()
+    public function vendedor()//Estabelecimento de relacionamento com tabela "vendedores"
     {
         return $this->belongsTo(Vendedor::class, 'id_vendedor');
     }
 
-    public function produto()
+    public function produto()//Estabelecimento de relacionamento com tabela "produtos"
     {
         return $this->belongsTo(Produto::class, 'id_produto');
     }

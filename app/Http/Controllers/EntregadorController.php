@@ -1,19 +1,24 @@
 <?php
 
+//Namespace
 namespace App\Http\Controllers;
 
+//Namespaces utilizados
 use App\Models\Api\Usuario;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
+//Classe de controle de "entregadores"
 class EntregadorController extends Controller
 {
     
+    //Função de listar os entregadores que ainda não foram aceitos no site para os admins
     public function entregadoresAguardandoAceitar(): JsonResponse {
-        try {
+        try {//Testa erro
 
+            //Código que lista usuários entregadores (id_categoria 4) não aceitos (aceito_admin 0), incluindo dados do entregador e do tipo de veiculo
             $ent = Usuario::where('id_categoria', 4)
               ->where('aceito_admin', 0)
 
@@ -26,9 +31,9 @@ class EntregadorController extends Controller
               ->orderBy('id')
               ->get();
 
-            return response()->json($ent, 200);
+            return response()->json($ent, 200);//Retorno de sucesso em json
 
-        } catch (Exception $e) {
+        } catch (Exception $e) {//Captura exceção e envia mensagem de erro
 
             return response()->json([
                 'mensagem' => 'Falha ao carregar os entregadores que aguardam aceitação.',

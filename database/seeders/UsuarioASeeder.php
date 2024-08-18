@@ -1,20 +1,22 @@
 <?php
 
+//Namespace
 namespace Database\Seeders;
 
+//Namespaces utilizados
 use App\Models\Api\Usuario;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
+//Classe para criar os usuários admin
 class UsuarioASeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
+    
+    //Função de rodar as seeds
     public function run(): void
     {
-        if(!Usuario::where('email', 'thiagopifferlauro@gmail.com')->exists()){
+        if(!Usuario::where('email', 'thiagopifferlauro@gmail.com')->exists()){//Cria o usuário do admin Thiago (mais gostoso do site) com seus dados
             Usuario::create([
                 'nome' => 'Incelso da Silva Jr.',
                 'email' => 'thiagopifferlauro@gmail.com',
@@ -26,7 +28,7 @@ class UsuarioASeeder extends Seeder
             ]);
         }
 
-        if(!Usuario::where('email', 'thalescasaro@gmail.com')->exists()){
+        if(!Usuario::where('email', 'thalescasaro@gmail.com')->exists()){//Cria o usuário do admin Thales com seus dados
             Usuario::create([
                 'nome' => 'Mico-Ladrão-Safado',
                 'email' => 'thalescasaro@gmail.com',
@@ -38,7 +40,7 @@ class UsuarioASeeder extends Seeder
             ]);
         }
 
-        if(!Usuario::where('email', 'lara.calegario43@gmail.com')->exists()){
+        if(!Usuario::where('email', 'lara.calegario43@gmail.com')->exists()){//Cria o usuário da admin Lara com seus dados
             Usuario::create([
                 'nome' => 'LaraGuedes',
                 'email' => 'lara.calegario43@gmail.com',
@@ -50,7 +52,7 @@ class UsuarioASeeder extends Seeder
             ]);
         }
 
-        if(!Usuario::where('email', 'bernardopereira5000@gmail.com')->exists()){
+        if(!Usuario::where('email', 'bernardopereira5000@gmail.com')->exists()){//Cria o usuário do admin Bernardo com seus dados
             Usuario::create([
                 'nome' => 'BolsonaroMito',
                 'email' => 'bernardopereira5000@gmail.com',

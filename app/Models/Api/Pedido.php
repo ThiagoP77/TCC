@@ -1,17 +1,20 @@
 <?php
 
+//Namespace
 namespace App\Models\Api;
 
+//Namespaces utilizados
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+//Classe modelo de pedidos
 class Pedido extends Model
 {
     use HasFactory;
 
-    protected $table = 'pedidos';
+    protected $table = 'pedidos';//Representa essa tabela
 
-    protected $fillable = [
+    protected $fillable = [//Campos que podem ser preenchidos
         'id_cliente',
         'id_vendedor',
         'id_entregador',
@@ -25,32 +28,32 @@ class Pedido extends Model
         'status',
     ];
 
-    public function cliente()
+    public function cliente()//Estabelecimento de relacionamento com tabela "clientes"
     {
         return $this->belongsTo(Cliente::class, 'id_cliente');
     }
 
-    public function vendedor()
+    public function vendedor()//Estabelecimento de relacionamento com tabela "vendedores"
     {
         return $this->belongsTo(Vendedor::class, 'id_vendedor');
     }
 
-    public function entregador()
+    public function entregador()//Estabelecimento de relacionamento com tabela "entregadores"
     {
         return $this->belongsTo(Entregador::class, 'id_entregador');
     }
 
-    public function metodoPagamento()
+    public function metodoPagamento()//Estabelecimento de relacionamento com tabela "metodos_pagamentos"
     {
         return $this->belongsTo(MetodoPagamento::class, 'id_pagamento');
     }
 
-    public function itens()
+    public function itens()//Estabelecimento de relacionamento com tabela "itens_pedidos"
     {
         return $this->hasMany(ItemPedido::class, 'id_pedido');
     }
 
-    public function produtos()
+    public function produtos()//Estabelecimento de relacionamento com tabela "produtos"
     {
         return $this->belongsToMany(Produto::class, 'itens_pedidos', 'id_pedido', 'id_produto')
                     ->withPivot('qtde', 'preco');

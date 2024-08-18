@@ -1,4 +1,7 @@
 <!DOCTYPE html>
+
+<!-- Design do email enviado ao usuário com o código de recuperação de senha -->
+
 <html lang="pt-br">
 
 <head>
@@ -16,7 +19,7 @@
 
     <p>{{ $codigo }}</p>
 
-    <p>Por questões de segurança esse código é válido somente até as {{ $data }} do dia {{ $tempo }}. Caso esse prazo esteja expirado, será necessário solicitar outro código.</p>
+    <p>Por questões de segurança esse código é válido somente até as {{ $tempo }} do dia {{ $data }}. Caso esse prazo esteja expirado, será necessário solicitar outro código.</p>
 
 </body>
 
