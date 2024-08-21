@@ -5,6 +5,7 @@ namespace App\Rules;
 
 //Namespaces utilizados
 use Closure;
+use Exception;
 use Illuminate\Contracts\Validation\ValidationRule;
 
 //Classe para validação de domínio de email
@@ -14,15 +15,24 @@ class EmailValidacao implements ValidationRule
     //Função da rule
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        
+           
         //Recebe o email
         $email = $value;
 
-        //Em caso de sucesso, não envia mensagem de erro
-        if ($this->validarDominio($email)) {
+        // Verifica se o email contém o caractere '@'
+        if (strpos($email, '@') !== false) {
+
+            // Em caso de sucesso, não envia mensagem de erro
+            if ($this->validarDominio($email)) {
+
+            } else {
+                //Mensagem de erro
+                $fail("Email apresenta domínio inválido ou a verificação não foi possível (problema de rede).");
+                return;
+            }
             
-        } else {//Mensagem de erro
-            $fail("Email apresenta domínio inválido.");
+        } else {
+            //Erro (a outra validação já envia o erro)
             return;
         }
             

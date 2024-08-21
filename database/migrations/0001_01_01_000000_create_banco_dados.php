@@ -85,6 +85,7 @@ return new class extends Migration
             $table->char('telefone', 15);//Char com o telefone
             $table->char('whatsapp', 15)->nullable();//Char com o whatsapp
             $table->char('cnpj', 18)->nullable();//Char com o cnpj
+            $table->text('descricao')->nullable();//Text com a descrição do vendedor
             $table->timestamps();//Data de criação e alteração do registro
 
             $table->foreign('id_usuario')->references('id')->on('usuarios')->onDelete('cascade');//Cria o relacionamento entre as tabelas (caso tenha registro, a exclusão é cascade)

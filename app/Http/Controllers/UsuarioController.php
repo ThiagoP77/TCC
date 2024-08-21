@@ -7,7 +7,6 @@ namespace App\Http\Controllers;
 use App\Events\AceitoAEvent;
 use App\Events\RecusadoAEvent;
 use App\Mail\EsqueceuSenhaMail;
-use App\Models\Api\Admin;
 use App\Models\Api\Cliente;
 use App\Models\Api\Entregador;
 use App\Models\Api\Usuario;
@@ -31,7 +30,6 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
-use App\Mail\AceitoAMail;
 use Laravel\Sanctum\PersonalAccessToken;
 
 //Classe de controle de "usuarios"
@@ -88,7 +86,7 @@ class UsuarioController extends Controller
     
             'email' => [
                 'required',
-                'email:rfc,dns',
+                'email',
                 'unique:usuarios,email',
                 new EmailValidacao()
             ],
@@ -111,6 +109,7 @@ class UsuarioController extends Controller
     
         ], [//Mensagens de erro personalizadas
             'id_categoria.in' => 'Tipo de usuário inválido.',
+            'id_categoria.required' => 'Tipo de usuário deve ser informado.',
             'nome.regex' => 'Nome não pode conter caracteres especiais.',
             'senha.regex' => 'A senha não pode conter espaços.'
         ]);
@@ -247,10 +246,20 @@ class UsuarioController extends Controller
                     'string', 
                     'regex:/^\d+$/'
                 ],
+
+                'descricao' => [
+                    'nullable', 
+                    'string', 
+                    'max:200'
+                ],
             ], [//Mensagens de erro personalizadas
                 'telefone.regex' => 'O telefone deve seguir o formato (XX) XXXXX-XXXX.',
                 'whatsapp.regex' => 'O Whatsapp deve seguir o formato (XX) XXXXX-XXXX.',
-                'numero.regex' => 'O número deve conter apenas números.'
+                'numero.regex' => 'O número deve conter apenas números.',
+                'numero.required' => 'O campo número é obrigatório.',
+                'numero.string' => 'O número deve ser uma string.',
+                'descricao.string' => 'O campo descrição deve ser uma string.',
+                'numero.max' => 'A descrição não pode passar de 200 caracteres.'
             ]);
 
             //Caso haja falhas no validator, envia json de erro
@@ -290,6 +299,7 @@ class UsuarioController extends Controller
                 $vendedor->telefone = $dadosValidados['telefone'];
                 $vendedor->whatsapp = $dadosValidados['whatsapp'];
                 $vendedor->cnpj = $dadosValidados['cnpj'];
+                $vendedor->descricao = $dadosValidados['descricao'];
                 $vendedor->id_usuario = $usuario->id;//Associando o vendedor ao usuário
                 $vendedor->save();//Salvando vendedor
 
@@ -360,7 +370,9 @@ class UsuarioController extends Controller
                 ],
             ], [//Mensagens de erro personalizadas
                 'telefone.regex' => 'O telefone deve seguir o formato (XX) XXXXX-XXXX.',
-                'placa.regex' => 'A placa deve seguir o formato XXX-XXXX (letras ou números).'
+                'placa.regex' => 'A placa deve seguir o formato XXX-XXXX (letras maiúsculas ou números).',
+                'id_tipo_veiculo.required' => 'O tipo de veículo deve ser informado.',
+                'id_tipo_veiculo.in' => 'O tipo de veículo é inválido.'
             ]);
             
             //Caso haja falhas no validator, envia json de erro
@@ -591,13 +603,20 @@ class UsuarioController extends Controller
 
             //Realiza a validação dos dados recebidos no request
             $validator = Validator::make($r->all(), [
-                'email' => 'required|email',
+                'email' => [
+                    'required',
+                    'email',
+                    new EmailValidacao()
+                ],
+
                 'senha' => [
                     'required',
                     'string',
                     'min:8',
                     'regex:/^\S*$/'
                 ],
+            ], [
+                'senha.regex' => 'A senha não pode conter espaços.'
             ]);
     
             //Se a validação der alguma falha, envia mensagem de erro
@@ -720,7 +739,7 @@ class UsuarioController extends Controller
                     default://Caso não seja um id_categoria válido, envia mensagem de erro
                         return response()->json([
                             'message' => 'Usuário inválido.'
-                        ], 404);
+                        ], 400);
                 }
     
                 //Gera um token de acesso com a ability fornecida
@@ -738,7 +757,7 @@ class UsuarioController extends Controller
             } else {//Envia mensagem de erro caso os dados não estejam no banco
                 return response()->json([
                     'message' => 'Senha incorreta.'
-                ], 404);
+                ], 400);
             }
     
         } catch (Exception $e) {//Captura exceção e envia mensagem de erro
@@ -813,7 +832,11 @@ class UsuarioController extends Controller
 
             //Realiza validação dos campos com os parâmetros informados
             $validator = Validator::make($r->all(), [
-                'email' => 'required|email'
+                'email' => [
+                    'required',
+                    'email',
+                    new EmailValidacao()
+                ],
             ]);
 
             //Se a validação der alguma falha, envia mensagem de erro
@@ -904,8 +927,18 @@ class UsuarioController extends Controller
 
             //Realiza a validação dos dados fornecidos
             $validator = Validator::make($r->all(), [
-                'email' => 'required|email',
-                'codigo' => 'required|size:6'
+                'email' =>  [
+                    'required',
+                    'email',
+                    new EmailValidacao()
+                ],
+
+                'codigo' => 'required|size:6|regex:/^\d+$/'
+
+            ], [
+                'codigo.required' => 'O campo código é obrigatório.',
+                'codigo.regex' => 'O código só deve conter números.',
+                'codigo.size' => 'O código deve ter seis caracteres.'
             ]);
     
             //Envia mensagem de erro no caso de falha na validação
@@ -953,8 +986,14 @@ class UsuarioController extends Controller
 
             //Realiza a validação dos dados fornecidos
             $validator = Validator::make($r->all(), [
-                'email' => 'required|email',
-                'codigo' => 'required|size:6',
+                'email' =>  [
+                    'required',
+                    'email',
+                    new EmailValidacao()
+                ],
+
+                'codigo' => 'required|size:6|regex:/^\d+$/',
+
                 'senha' => [
                     'required',
                     'string',
@@ -962,6 +1001,11 @@ class UsuarioController extends Controller
                     'min:8',
                     'regex:/^\S*$/'
                 ],
+            ], [
+                'codigo.required' => 'O campo código é obrigatório.',
+                'codigo.size' => 'O código deve ter seis caracteres.',
+                'codigo.regex' => 'O código só deve conter números.',
+                'senha.regex' => 'A senha não pode conter espaços.'
             ]);
     
             //Envia mensagem de erro no caso de falha na validação

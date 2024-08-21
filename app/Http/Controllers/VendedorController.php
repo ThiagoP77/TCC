@@ -22,8 +22,8 @@ class VendedorController extends Controller
               ->where('aceito_admin', 0)
 
               ->with(['vendedor' => function($query) {
-                $query->select('id','id_usuario', 'telefone', 'whatsapp', 'cnpj')
-                      ->with('endereco:id_vendedor,cep,logradouro,bairro,localidade,uf');
+                $query->select('id','id_usuario', 'telefone', 'whatsapp', 'cnpj', 'descricao')
+                      ->with('endereco:id_vendedor,cep,logradouro,bairro,localidade,uf,numero');
                 }])
 
               ->select('id', 'nome', 'email', 'cpf', 'foto_login')

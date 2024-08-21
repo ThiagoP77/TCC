@@ -20,6 +20,7 @@ class Vendedor extends Model
         'telefone',
         'whatsapp',
         'cnpj',
+        'descricao'
     ];
 
     public function usuario()//Estabelecimento de relacionamento com tabela "usuarios"
