@@ -7,6 +7,7 @@ namespace App\Http\Controllers;
 use App\Events\AceitoAEvent;
 use App\Events\RecusadoAEvent;
 use App\Mail\EsqueceuSenhaMail;
+use App\Models\Api\Admin;
 use App\Models\Api\Cliente;
 use App\Models\Api\Entregador;
 use App\Models\Api\Usuario;
@@ -15,6 +16,7 @@ use App\Models\Api\EnderecoVendedor;
 use App\Rules\CepValidacao;
 use App\Rules\CnpjValidacao;
 use App\Rules\CpfValidacao;
+use App\Rules\EmailValidacao;
 use App\Rules\TelWhaValidacao;
 use App\Service\ConsultaCEPService;
 use App\Service\ValidarCodigoService;
@@ -30,6 +32,7 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use App\Mail\AceitoAMail;
+use Laravel\Sanctum\PersonalAccessToken;
 
 //Classe de controle de "usuarios"
 class UsuarioController extends Controller
@@ -83,7 +86,12 @@ class UsuarioController extends Controller
     
             'id_categoria' => 'required|integer|in:2,3,4',
     
-            'email' => 'required|email|unique:usuarios,email',
+            'email' => [
+                'required',
+                'email:rfc,dns',
+                'unique:usuarios,email',
+                new EmailValidacao()
+            ],
     
             'senha' => [
                 'required',
@@ -233,9 +241,16 @@ class UsuarioController extends Controller
                     'string', 
                     new CepValidacao
                 ],
+
+                'numero' => [
+                    'required', 
+                    'string', 
+                    'regex:/^\d+$/'
+                ],
             ], [//Mensagens de erro personalizadas
                 'telefone.regex' => 'O telefone deve seguir o formato (XX) XXXXX-XXXX.',
-                'whatsapp.regex' => 'O Whatsapp deve seguir o formato (XX) XXXXX-XXXX.'
+                'whatsapp.regex' => 'O Whatsapp deve seguir o formato (XX) XXXXX-XXXX.',
+                'numero.regex' => 'O número deve conter apenas números.'
             ]);
 
             //Caso haja falhas no validator, envia json de erro
@@ -304,6 +319,7 @@ class UsuarioController extends Controller
                 $enderecoV->bairro = $cepData['bairro'];
                 $enderecoV->localidade = $cepData['localidade'];
                 $enderecoV->uf = $cepData['uf'];
+                $enderecoV->numero = $dadosValidados['numero'];
                 $enderecoV->id_vendedor = $vendedor->id;//Associando o endereço ao vendedor
                 $enderecoV->save();//Salvando endereço
 
@@ -623,6 +639,9 @@ class UsuarioController extends Controller
 
                 //Recebe o usuário que apresenta as credenciais
                 $user = Auth::user();
+
+                //Exclui tokens antigos, se houver
+                $u->tokens()->delete();
                 
                 //Criando as variaveis de abilities e caminho
                 $hab = null;
@@ -633,18 +652,70 @@ class UsuarioController extends Controller
                     case 1:
                         $caminho = '/admins';
                         $hab = 'admin';
+
+                        //Instancia de Admin correspondente
+                        $c = $u->admin;
+
+                        //Pega id
+                        if ($c) {
+                            $id_c = $c->id;
+                        } else {//Não achou
+                            return response()->json([
+                                'error' => 'Falha ao logar.',
+                            ], 404);
+                        }
+
                         break;
                     case 2:
                         $caminho = '/clientes';
                         $hab = 'cliente';
+
+                        //Instancia de cliente correspondente
+                        $c = $u->cliente;
+
+                        //Pega id
+                        if ($c) {
+                            $id_c = $c->id;
+                        } else {//Não achou
+                            return response()->json([
+                                'error' => 'Falha ao logar.',
+                            ], 404);
+                        }
+
                         break;
                     case 3:
                         $caminho = '/vendedores';
                         $hab = 'vendedor';
+
+                        //Instancia de vendedor correspondente
+                        $c = $u->vendedor;
+
+                        //Pega id
+                        if ($c) {
+                            $id_c = $c->id;
+                        } else {//Não achou
+                            return response()->json([
+                                'error' => 'Falha ao logar.',
+                            ], 404);
+                        }
+
                         break;
                     case 4:
                         $caminho = '/entregadores';
                         $hab = 'entregador';
+
+                        //Instancia de entregador correspondente
+                        $c = $u->entregador;
+
+                        //Pega id
+                        if ($c) {
+                            $id_c = $c->id;
+                        } else {//Não achou
+                            return response()->json([
+                                'error' => 'Falha ao logar.',
+                            ], 404);
+                        }
+
                         break;
                     default://Caso não seja um id_categoria válido, envia mensagem de erro
                         return response()->json([
@@ -659,7 +730,8 @@ class UsuarioController extends Controller
                 return response()->json([
                     'message' => true,
                     'caminho' => $caminho,
-                    'id' => $user->id,
+                    'id_u' => $user->id,
+                    'id_c' => $id_c,
                     'token' => $token
                 ], 200);
                 
@@ -678,18 +750,46 @@ class UsuarioController extends Controller
     }
 
     //Função de logout
-    public function logout($id): JsonResponse{
+    public function logout(Request $r, $id): JsonResponse{
         try {//Testa exceção
 
             //Tenta encontrar usuário com base no email fornecido. Se não conseguir, envia mensagem de erro
             $u = Usuario::findOrFail($id);
 
-            //Delata os tokens de acesso do usuário
-            $u->tokens()->delete();
+            // Obtém o token da solicitação
+            $token = $r->bearerToken();
 
-            return response()->json([//Envia mensagem de sucesso
-                'mensagem' => 'Deslogado com sucesso.',
-            ], 200);
+            //Remove os caracteres antes do | e o | do token
+            if (strpos($token, '|') !== false) {
+                $token = strstr($token, '|');
+                $token = substr($token, 1);
+            }
+
+            // Hash do token
+            $hashedToken = hash('sha256', $token);
+
+            //Procura pelo token compatível no banco de dados
+            $userToken = PersonalAccessToken::where('token', $hashedToken)
+                ->where('tokenable_id', $u->id)
+                ->first();
+
+            // Verifica se o token pertence ao usuário e o exclui se encontrado
+            if ($userToken) {
+
+                //Exclui os tokens do usuário
+                $u->tokens()->delete();
+
+                return response()->json([//Envia mensagem de sucesso
+                    'mensagem' => 'Deslogado com sucesso.',
+                ], 200);
+
+            } else {//Mensagem de erro caso não bata a comparação
+
+                return response()->json([
+                    'error' => 'Token de acesso não encontrado ou não pertence ao usuário.',
+                ], 400);
+
+            }           
 
         } catch (ModelNotFoundException $e) {//Envia mensagem de erro caso o usuário não seja encontrado
             return response()->json([
@@ -707,7 +807,7 @@ class UsuarioController extends Controller
         
     }
 
-    //Função de informar qu esqueceu a senha de login
+    //Função de informar que esqueceu a senha de login
     public function esqueceuSenha(Request $r): JsonResponse{
         try {//Testa exceção
 

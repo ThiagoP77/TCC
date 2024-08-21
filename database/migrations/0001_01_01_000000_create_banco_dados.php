@@ -73,6 +73,7 @@ return new class extends Migration
             $table->string('bairro')->nullable();//String bairro
             $table->string('localidade')->nullable();//String localidade
             $table->string('uf')->nullable();//String uf
+            $table->string('numero');//String numero
             $table->timestamps();//Data de criação e alteração do registro
 
             $table->foreign('id_cliente')->references('id')->on('clientes')->onDelete('cascade');//Cria o relacionamento entre as tabelas (caso tenha registro, a exclusão é cascade)
@@ -97,6 +98,7 @@ return new class extends Migration
             $table->string('bairro')->nullable();//String bairro
             $table->string('localidade')->nullable();//String localidade
             $table->string('uf')->nullable();//String uf
+            $table->string('numero');//String numero
             $table->timestamps();//Data de criação e alteração do registro
 
             $table->foreign('id_vendedor')->references('id')->on('vendedores')->onDelete('cascade');//Cria o relacionamento entre as tabelas (caso tenha registro, a exclusão é cascade)
