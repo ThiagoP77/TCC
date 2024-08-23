@@ -8,6 +8,7 @@ use App\Http\Controllers\MetodoPagamentoController;
 use App\Http\Controllers\TipoVeiculoController;
 use App\Http\Controllers\UsuarioController;
 use App\Http\Controllers\VendedorController;
+use App\Http\Controllers\VerifyEmailController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -34,6 +35,7 @@ Route::prefix('usuarios')->group(function () {
     Route::post('/esqueceu-senha', [UsuarioController::class, 'esqueceuSenha']);//Realizar cadastro de novo usuário
     Route::post('/validar-codigo', [UsuarioController::class, 'validarCodigo']);//Realizar cadastro de novo usuário
     Route::post('/resetar-senha', [UsuarioController::class, 'resetarSenha']);//Realizar cadastro de novo usuário
+    Route::post('/reenviar-verificar-email', [VerifyEmailController::class, 'resendNotification']);//Reenviar o email de verificação
 });
 
 //Rotas utilizadas por usuários admin
@@ -44,11 +46,11 @@ Route::prefix('admins')->middleware(['auth:sanctum', 'abilities:admin'])->group(
     Route::delete('/recusaradmin/{id}', [UsuarioController::class, 'recusarAdmin']);//Rejeita o vendedor ou entregador correspondente ao id inserido, além de excluir seus dados
 });
 
-//Modelo de como defender as rotas no final  
+//Modelo de teste  
 /*
 Route::get('/orders', function () {
         return response()->json([
             'message' => 'Deu certo.'
         ], 200); 
-})->middleware(['auth:sanctum', 'abilities:entregador']);
+})->middleware(['auth:sanctum']);
 */

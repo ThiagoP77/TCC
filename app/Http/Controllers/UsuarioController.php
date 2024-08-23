@@ -21,6 +21,7 @@ use App\Service\ConsultaCEPService;
 use App\Service\ValidarCodigoService;
 use Carbon\Carbon;
 use Exception;
+use Illuminate\Auth\Events\Registered;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -193,7 +194,9 @@ class UsuarioController extends Controller
 
                 DB::commit();//Fazendo commit da operação
 
-                return response()->json(['mensagem' => 'Cliente cadastrado com sucesso.'], 200);//Retorno da mensagem de sucesso
+                event(new Registered($usuario));//Enviando email de verificação
+
+                return response()->json(['mensagem' => 'Cliente cadastrado com sucesso, um email de verificação foi enviado.'], 200);//Retorno da mensagem de sucesso
 
             } catch (Exception $e) {//Captura exceção e envia mensagem de erro
 
@@ -335,7 +338,9 @@ class UsuarioController extends Controller
 
                 DB::commit();//Fazendo commit da operação
 
-                return response()->json(['mensagem' => 'Vendedor cadastrado com sucesso, aguarde autorização de algum admin.'], 200);//Retorno da mensagem de sucesso
+                event(new Registered($usuario));//Envia email de verificação
+
+                return response()->json(['mensagem' => 'Vendedor cadastrado com sucesso, aguarde autorização de algum admin. Um email de verificação foi enviado!'], 200);//Retorno da mensagem de sucesso
 
             } catch (Exception $e) {//Captura exceção e envia mensagem de erro
 
@@ -417,7 +422,9 @@ class UsuarioController extends Controller
 
                 DB::commit();//Fazendo commit da operação
 
-                return response()->json(['mensagem' => 'Entregador cadastrado com sucesso, aguarde autorização de algum admin.'], 200);//Retorno da mensagem de sucesso
+                event(new Registered($usuario));//Envia email de verificação
+
+                return response()->json(['mensagem' => 'Entregador cadastrado com sucesso, aguarde autorização de algum admin. Um email de verificação foi enviado!'], 200);//Retorno da mensagem de sucesso
 
             } catch (Exception $e) {//Captura exceção e envia mensagem de erro
 
@@ -427,18 +434,22 @@ class UsuarioController extends Controller
                     'mensagem' => 'Erro ao cadastrar usuário.',
                     'erro' => $e->getMessage()
                 ], 400);
+
             }
+
         } else {//Envia mensagem de erro caso não se encaixe em nenhum if
+
             return response()->json([
                 'mensagem' => 'Erro ao cadastrar usuário.'
             ], 400);
         }
+
     } catch (Exception $e) {
         return response()->json([
             'mensagem' => 'Erro ao cadastrar usuário.',
             'erro' => $e->getMessage()
         ], 400);
-        }
+    }
     }
 
     //Função de aceitar entregador ou vendedor pelo admin
@@ -636,6 +647,15 @@ class UsuarioController extends Controller
                 ], 404);
             }
 
+            //Verifica se o usuário já verificou o email
+            if($u->email_verified_at == null) {
+
+                return response()->json([
+                    'mensagem' => 'Login não permitido. Seu endereço de email ainda não foi verificado!',
+                ], 400);
+
+            }
+
             //Verifica se o usuário é entregador ou vendedor e se ja foi aceito no sistema. Caso não seja, envia mensagem de erro 
             if ($u->id_categoria == 3 || $u->id_categoria == 4){
                 if ($u->aceito_admin == 0) {
@@ -658,9 +678,6 @@ class UsuarioController extends Controller
 
                 //Recebe o usuário que apresenta as credenciais
                 $user = Auth::user();
-
-                //Exclui tokens antigos, se houver
-                $u->tokens()->delete();
                 
                 //Criando as variaveis de abilities e caminho
                 $hab = null;
@@ -795,8 +812,8 @@ class UsuarioController extends Controller
             // Verifica se o token pertence ao usuário e o exclui se encontrado
             if ($userToken) {
 
-                //Exclui os tokens do usuário
-                $u->tokens()->delete();
+                //Exclui o token especifico do usuário
+                $userToken->delete();
 
                 return response()->json([//Envia mensagem de sucesso
                     'mensagem' => 'Deslogado com sucesso.',

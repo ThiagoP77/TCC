@@ -4,14 +4,14 @@
 namespace App\Models\Api;
 
 //Namespaces utilizados
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
-//Classe modelo de usuario
-class Usuario extends Authenticatable
+//Classe modelo de usuario (hernça da classe de autenticação e implementando a interface de verificação de email)
+class Usuario extends Authenticatable implements MustVerifyEmail
 {
     use HasApiTokens,HasFactory, Notifiable;
 
@@ -26,7 +26,6 @@ class Usuario extends Authenticatable
         'id_categoria',
         'aceito_admin',
     ];
-
 
     protected $hidden = [//Campos ocultos
         'senha',
