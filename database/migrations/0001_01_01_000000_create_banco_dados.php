@@ -143,7 +143,8 @@ return new class extends Migration
         Schema::create('avaliacoes', function (Blueprint $table) {//Tabela de avaliações
             $table->unsignedBigInteger('id_cliente');//Chave estrangeira de "clientes"
             $table->unsignedBigInteger('id_vendedor');//Chave estrangeira de "vendedores"
-            $table->tinyInteger('avaliacao')->unsigned()->check('avaliacao >= 0 AND avaliacao <= 5');//Integer entre 0 e 5 que indica a avaliação da loja pelo cliente
+            $table->decimal('avaliacao', 2, 1) // Decimal com 1 casa decimal
+                ->check('avaliacao >= 0 AND avaliacao <= 5'); // Restrição para garantir o intervalo de 0 a 5
             $table->timestamps();//Data de criação e alteração do registro
 
             $table->primary(['id_cliente', 'id_vendedor']);

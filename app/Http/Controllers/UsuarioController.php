@@ -262,7 +262,7 @@ class UsuarioController extends Controller
                 'numero.required' => 'O campo número é obrigatório.',
                 'numero.string' => 'O número deve ser uma string.',
                 'descricao.string' => 'O campo descrição deve ser uma string.',
-                'numero.max' => 'A descrição não pode passar de 200 caracteres.'
+                'descricao.max' => 'A descrição não pode passar de 200 caracteres.'
             ]);
 
             //Caso haja falhas no validator, envia json de erro
@@ -686,7 +686,7 @@ class UsuarioController extends Controller
                 //Utiliza o id_categoria para gerar o caminho e a ability correspondente
                 switch ($user->id_categoria) {
                     case 1:
-                        $caminho = '/admins';
+                        $caminho = '/adm';
                         $hab = 'admin';
 
                         //Instancia de Admin correspondente
@@ -703,7 +703,7 @@ class UsuarioController extends Controller
 
                         break;
                     case 2:
-                        $caminho = '/clientes';
+                        $caminho = '/cliente';
                         $hab = 'cliente';
 
                         //Instancia de cliente correspondente
@@ -720,7 +720,7 @@ class UsuarioController extends Controller
 
                         break;
                     case 3:
-                        $caminho = '/vendedores';
+                        $caminho = '/loja';
                         $hab = 'vendedor';
 
                         //Instancia de vendedor correspondente
@@ -737,7 +737,7 @@ class UsuarioController extends Controller
 
                         break;
                     case 4:
-                        $caminho = '/entregadores';
+                        $caminho = '/entregador';
                         $hab = 'entregador';
 
                         //Instancia de entregador correspondente
@@ -785,11 +785,12 @@ class UsuarioController extends Controller
         }
     }
 
+    /*
     //Função de logout
     public function logout(Request $r, $id): JsonResponse{
         try {//Testa exceção
 
-            //Tenta encontrar usuário com base no email fornecido. Se não conseguir, envia mensagem de erro
+            //Tenta encontrar usuário com base no id fornecido. Se não conseguir, envia mensagem de erro
             $u = Usuario::findOrFail($id);
 
             // Obtém o token da solicitação
@@ -841,7 +842,7 @@ class UsuarioController extends Controller
 
         }
         
-    }
+    }*/
 
     //Função de informar que esqueceu a senha de login
     public function esqueceuSenha(Request $r): JsonResponse{
@@ -1078,4 +1079,201 @@ class UsuarioController extends Controller
         }
     }
 
+    public function dadosUsuario ($id) {
+        try{
+
+            //Verifica se o id informado é númerico e existe na tabela de usuários. Caso não existe, envia mensagem de erro
+            if (!is_numeric($id) || !Usuario::where('id', $id)->exists()) {
+                return response()->json([
+                    'message' => 'Usuário não encontrado.'
+                ], 404);
+            }
+
+            //Encontra o usuário informado pelo id
+            $u = Usuario::find($id);
+
+            //Utiliza o id_categoria para pegar os dados correspondentes
+            switch ($u->id_categoria) {
+                case 1:
+
+                    //Instancia de Admin correspondente
+                    $c = $u->admin;
+
+                    //Pega id
+                    if ($c) {
+                        $resposta = Usuario::where('id', $id)
+          
+                        ->with(['categoria:id,nome'])
+                        ->with(['admin:id,id_usuario'])
+          
+                        ->select('id', 'nome', 'email', 'cpf', 'foto_login', 'id_categoria')
+                        ->get();
+
+                        return response()->json($resposta);
+
+                    } else {//Não achou
+                        return response()->json([
+                            'error' => 'Falha ao mostrar dados.',
+                        ], 404);
+                    }
+
+                case 2:
+
+                    //Instancia de cliente correspondente
+                    $c = $u->cliente;
+
+                    //Pega id
+                    if ($c) {
+
+                        $resposta = Usuario::where('id', $id)
+          
+                        ->with(['categoria:id,nome'])
+                        ->with(['cliente:id,id_usuario,telefone'])
+          
+                        ->select('id', 'nome', 'email', 'cpf', 'foto_login', 'id_categoria')
+                        ->get();
+
+                        return response()->json($resposta);
+
+                    } else {//Não achou
+                        return response()->json([
+                            'error' => 'Falha ao mostrar dados.',
+                        ], 404);
+                    }
+
+                case 3:
+
+                    //Instancia de vendedor correspondente
+                    $c = $u->vendedor;
+
+                    //Pega id
+                    if ($c) {
+
+                        $resposta = Usuario::where('id', $id)
+          
+                        ->with(['categoria:id,nome'])
+                        ->with(['vendedor' => function($query) {
+                            $query->select('id','id_usuario', 'telefone', 'whatsapp', 'cnpj', 'descricao')
+                                  ->with('endereco:id_vendedor,cep,logradouro,bairro,localidade,uf,numero');
+                            }])
+          
+                        ->select('id', 'nome', 'email', 'cpf', 'foto_login', 'id_categoria')
+                        ->get();
+
+                        return response()->json($resposta);
+
+                    } else {//Não achou
+                        return response()->json([
+                            'error' => 'Falha ao mostrar dados.',
+                        ], 404);
+                    }
+
+                case 4:
+
+                    //Instancia de entregador correspondente
+                    $c = $u->entregador;
+
+                    //Pega id
+                    if ($c) {
+                        
+                        $resposta = Usuario::where('id', $id)
+          
+                        ->with(['categoria:id,nome'])
+
+                        ->with(['entregador' => function($query) {
+                            $query->select('id_usuario', 'telefone', 'placa', 'id_tipo_veiculo')
+                                  ->with('tipoVeiculo:id,nome');
+                        }])
+          
+                        ->select('id', 'nome', 'email', 'cpf', 'foto_login', 'id_categoria')
+                        ->get();
+
+                        return response()->json($resposta);
+
+                    } else {//Não achou
+                        return response()->json([
+                            'error' => 'Falha ao mostrar dados.',
+                        ], 404);
+                    }
+
+                default://Caso não seja um id_categoria válido, envia mensagem de erro
+                    return response()->json([
+                        'message' => 'Usuário inválido.'
+                    ], 400);
+            }
+
+
+        } catch (Exception $e) {
+            return response()->json([
+                'message' => 'Não foi possível pegar os dados.',
+                'erro' => $e->getMessage()
+            ], 400);
+        }
+    }
+
+    public function excluirUsuario ($id) {
+
+        try {//Testa exceção
+
+            //Verifica se o id informado é númerico e existe na tabela de usuários. Caso não existe, envia mensagem de erro
+            if (!is_numeric($id) || !Usuario::where('id', $id)->exists()) {
+                return response()->json([
+                    'message' => 'Usuário não encontrado.'
+                ], 404);
+            }
+    
+            //Encontra o usuário informado pelo id
+            $u = Usuario::find($id);
+
+            //Recebe os dados do usuário
+            $idCategoria = $u->id_categoria;
+            $fotoURL = $u->foto_login;
+
+            //Se o usuário não for entregador ou vendedor, retorna mensagem de erro
+            if (($idCategoria == 1)) {
+                return response()->json([
+                    'message' => 'O usuário é admin e não pode ser excluído.'
+                ], 403);
+            }
+
+            //URL da imagem default do site
+            $defaultURL = 'storage/imagens_usuarios/imagem_default_usuario.jpg';
+
+            //Caso consiga deletar o usuário, irá entrar no if 
+            if ($u->delete()) {
+
+                //Verificar se a foto existe e é a default e, se não for, exclui ela do site
+                if ($fotoURL && $fotoURL !== $defaultURL) {
+
+                    $p = str_replace('storage/', '', $fotoURL);
+
+                    if (Storage::disk('public')->exists($p)) {
+                        Storage::disk('public')->delete($p);//Excluindo ela
+                    }
+
+                }
+    
+                $u->delete();//Deletando o usuário
+
+                return response()->json([//Envia mensagem de sucesso caso tudo tenha ocorrido de forma correta
+                    'message' => 'Usuário excluído com sucesso.'
+                ], 200);
+
+            } else {//Mensagem de erro caso não se encaixe em nenhum if
+
+                return response()->json([
+                    'message' => 'Usuário não encontrado.'
+                ], 404);
+
+            }
+
+        } catch (Exception $e) {//Captura exceção e envia mensagem de erro
+
+            return response()->json([
+                'mensagem' => 'Falha ao excluir usuário.',
+                'erro' => $e->getMessage()
+            ], 400);
+
+        }
+    }
 }
