@@ -9,8 +9,4 @@ return [
     'exposed_headers' => [],
     'max_age' => 0,
     'supports_credentials' => false,
-<<<<<<< HEAD
 ];
-=======
-];
->>>>>>> e3c728043c2f25ce4dd9b570aba096ba137e86c7
