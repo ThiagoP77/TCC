@@ -55,7 +55,7 @@ class UsuariosTesteSeeder extends Seeder
                 'senha' => Hash::make("senha123"),
                 'email_verified_at' => Carbon::now(),
                 'cpf' => '244.462.520-03',
-                'foto_login' => 'storage/imagens_usuarios/Imagem_Admin_Bernardo.jpg',
+                'foto_login' => 'storage/imagens_usuarios/imagem_default_usuario.jpg',
                 'id_categoria' => 3,
                 'aceito_admin' => true,
             ]);
@@ -68,7 +68,7 @@ class UsuariosTesteSeeder extends Seeder
                 'senha' => Hash::make("senha123"),
                 'email_verified_at' => Carbon::now(),
                 'cpf' => '423.560.380-94',
-                'foto_login' => 'storage/imagens_usuarios/Imagem_Admin_Bernardo.jpg',
+                'foto_login' => 'storage/imagens_usuarios/imagem_default_usuario.jpg',
                 'id_categoria' => 4,
                 'aceito_admin' => true,
             ]);
