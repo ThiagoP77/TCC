@@ -789,65 +789,6 @@ class UsuarioController extends Controller
         }
     }
 
-    /*
-    //Função de logout
-    public function logout(Request $r, $id): JsonResponse{
-        try {//Testa exceção
-
-            //Tenta encontrar usuário com base no id fornecido. Se não conseguir, envia mensagem de erro
-            $u = Usuario::findOrFail($id);
-
-            // Obtém o token da solicitação
-            $token = $r->bearerToken();
-
-            //Remove os caracteres antes do | e o | do token
-            if (strpos($token, '|') !== false) {
-                $token = strstr($token, '|');
-                $token = substr($token, 1);
-            }
-
-            // Hash do token
-            $hashedToken = hash('sha256', $token);
-
-            //Procura pelo token compatível no banco de dados
-            $userToken = PersonalAccessToken::where('token', $hashedToken)
-                ->where('tokenable_id', $u->id)
-                ->first();
-
-            // Verifica se o token pertence ao usuário e o exclui se encontrado
-            if ($userToken) {
-
-                //Exclui o token especifico do usuário
-                $userToken->delete();
-
-                return response()->json([//Envia mensagem de sucesso
-                    'mensagem' => 'Deslogado com sucesso.',
-                ], 200);
-
-            } else {//Mensagem de erro caso não bata a comparação
-
-                return response()->json([
-                    'error' => 'Token de acesso não encontrado ou não pertence ao usuário.',
-                ], 400);
-
-            }           
-
-        } catch (ModelNotFoundException $e) {//Envia mensagem de erro caso o usuário não seja encontrado
-            return response()->json([
-                'error' => 'Usuário não encontrado.',
-            ], 404);
-
-        } catch (Exception $e) {//Envia mensagem de erro no caso de alguma outra exceção lançada
-
-            return response()->json([
-                'mensagem' => 'Falha ao deslogar.',
-                'erro' => $e->getMessage()
-            ], 400);
-
-        }
-        
-    }*/
-
     //Função de informar que esqueceu a senha de login
     public function esqueceuSenha(Request $r): JsonResponse{
         try {//Testa exceção
@@ -1285,6 +1226,33 @@ class UsuarioController extends Controller
                 'erro' => $e->getMessage()
             ], 400);
 
+        }
+    }
+
+    //Função de mostrar a foto do usuário por id
+    public function fotoUsuario ($id) {
+        try{//Testa se tem exceção
+    
+            //Verifica se o id informado é númerico e existe na tabela de usuários. Caso não existe, envia mensagem de erro
+            if (!is_numeric($id) || !Usuario::where('id', $id)->exists()) {
+                return response()->json([
+                    'mensagem' => 'Usuário não encontrado.'
+                ], 404);
+            }
+    
+            //Encontra o usuário informado pelo id
+            $u = Usuario::find($id);
+
+            //Envia o caminho da imagem
+            return response()->json([
+                'url' => $u->foto_login
+            ], 200);
+    
+        } catch (Exception $e) {//Captura exceção e envia mensagem de erro
+            return response()->json([
+                'mensagem' => 'Não foi possível mostrar a imagem.',
+                'erro' => $e->getMessage()
+            ], 400);
         }
     }
 }

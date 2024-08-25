@@ -40,10 +40,10 @@ Route::prefix('usuarios')->group(function () {
     //Rotas de manipulação de usuários
     Route::post('/cadastro', [UsuarioController::class, 'cadastro']);//Realizar cadastro de novo usuário
     Route::get('/dadosUsuario/{id}', [UsuarioController::class, 'dadosUsuario'])->middleware(['auth:sanctum']);//Pegar dados do usuário
+    Route::get('/fotoUsuario/{id}', [UsuarioController::class, 'fotoUsuario'])->middleware(['auth:sanctum']);//Pegar foto do usuário
 
     //Rotas do sistema de login
     Route::post('/login', [UsuarioController::class, 'login'])->name('login');//Logar no site
-    //Route::delete('/logout/{id}', [UsuarioController::class, 'logout'])->middleware(['auth:sanctum']);//Deslogar do site (precisa logar primeiro, obviamente)
 
     //Rotas de resetar senha
     Route::post('/esqueceu-senha', [UsuarioController::class, 'esqueceuSenha']);//Realizar cadastro de novo usuário
