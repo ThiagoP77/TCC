@@ -45,6 +45,7 @@ class VerifyEmailController extends Controller
   
     }
  
+    //Função de reenviar verificação de email
     public function resendNotification(Request $r) {
         try {//Testa exceção
 

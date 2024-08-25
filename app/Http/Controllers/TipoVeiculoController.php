@@ -13,6 +13,7 @@ use Illuminate\Http\Request;
 class TipoVeiculoController extends Controller
 {
     
+    //Função de listar os tipos de veículo
     public function tiposVeiculo(): JsonResponse {
         try {//Verfiica exceção
             $tipo = TipoVeiculo::select('id', 'nome')->orderBy('id')->get();//Recebe os tipos de veiculo

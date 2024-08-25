@@ -1079,8 +1079,9 @@ class UsuarioController extends Controller
         }
     }
 
+    //Função de mostrar os dados do usuário por id
     public function dadosUsuario ($id) {
-        try{
+        try{//Testa se tem exceção
 
             //Verifica se o id informado é númerico e existe na tabela de usuários. Caso não existe, envia mensagem de erro
             if (!is_numeric($id) || !Usuario::where('id', $id)->exists()) {
@@ -1101,6 +1102,8 @@ class UsuarioController extends Controller
 
                     //Pega id
                     if ($c) {
+
+                        //Pegando os dados e enviando resposta de sucesso
                         $resposta = Usuario::where('id', $id)
           
                         ->with(['categoria:id,nome'])
@@ -1113,7 +1116,7 @@ class UsuarioController extends Controller
 
                     } else {//Não achou
                         return response()->json([
-                            'error' => 'Falha ao mostrar dados.',
+                            'message' => 'Falha ao mostrar dados.',
                         ], 404);
                     }
 
@@ -1125,6 +1128,7 @@ class UsuarioController extends Controller
                     //Pega id
                     if ($c) {
 
+                        //Pegando os dados e enviando resposta de sucesso
                         $resposta = Usuario::where('id', $id)
           
                         ->with(['categoria:id,nome'])
@@ -1137,7 +1141,7 @@ class UsuarioController extends Controller
 
                     } else {//Não achou
                         return response()->json([
-                            'error' => 'Falha ao mostrar dados.',
+                            'message' => 'Falha ao mostrar dados.',
                         ], 404);
                     }
 
@@ -1149,6 +1153,7 @@ class UsuarioController extends Controller
                     //Pega id
                     if ($c) {
 
+                        //Pegando os dados e enviando resposta de sucesso
                         $resposta = Usuario::where('id', $id)
           
                         ->with(['categoria:id,nome'])
@@ -1164,7 +1169,7 @@ class UsuarioController extends Controller
 
                     } else {//Não achou
                         return response()->json([
-                            'error' => 'Falha ao mostrar dados.',
+                            'message' => 'Falha ao mostrar dados.',
                         ], 404);
                     }
 
@@ -1175,7 +1180,8 @@ class UsuarioController extends Controller
 
                     //Pega id
                     if ($c) {
-                        
+
+                        //Pegando os dados e enviando resposta de sucesso
                         $resposta = Usuario::where('id', $id)
           
                         ->with(['categoria:id,nome'])
@@ -1192,7 +1198,7 @@ class UsuarioController extends Controller
 
                     } else {//Não achou
                         return response()->json([
-                            'error' => 'Falha ao mostrar dados.',
+                            'message' => 'Falha ao mostrar dados.',
                         ], 404);
                     }
 
@@ -1203,7 +1209,7 @@ class UsuarioController extends Controller
             }
 
 
-        } catch (Exception $e) {
+        } catch (Exception $e) {//Captura exceção e envia mensagem de erro
             return response()->json([
                 'message' => 'Não foi possível pegar os dados.',
                 'erro' => $e->getMessage()
@@ -1211,6 +1217,7 @@ class UsuarioController extends Controller
         }
     }
 
+    //Função de excluir usuário por id
     public function excluirUsuario ($id) {
 
         try {//Testa exceção

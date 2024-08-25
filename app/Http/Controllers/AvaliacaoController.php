@@ -256,7 +256,7 @@ class AvaliacaoController extends Controller
             //Verifica se o vendedor existe e, caso não, envia mensagem de erro
             if (!$vend) {
                 return response()->json([
-                    'error' => 'Falha ao encontrar o vendedor.',
+                    'message' => 'Falha ao encontrar o vendedor.',
                 ], 404);
             }
 
