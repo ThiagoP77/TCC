@@ -274,7 +274,7 @@ Mensagens de sucesso (todas com status 200):
 -Para admin (obs.: gera token com habilidade de admin):
 {
         "message": true,
-        "caminho": "\/admins",
+        "caminho": "\/adm",
         "id": 1,
 "token":"1|qEk5ftEEdtEAMtFnWzXFQaSnT5OY2SxftL4VhuB1a2377fd2"
 }
@@ -296,7 +296,7 @@ Mensagens de sucesso (todas com status 200):
 -Para vendedor (obs.: gera token com habilidade de vendedor):
 {
         "message": true,
-        "caminho": "\/vendedores",
+        "caminho": "\/loja",
         "id": 1,
 "token":"1|qEk5ftEEdtEAMtFnWzXFQaSnT5OY2SxftL4VhuB1a2377fd2"
 }
@@ -305,7 +305,7 @@ Mensagens de sucesso (todas com status 200):
 -Para entregador (obs.: gera token com habilidade de entregador):
 {
         "message": true,
-        "caminho": "\/entregadores",
+        "caminho": "\/entregador",
         "id": 1,
 "token":"1|qEk5ftEEdtEAMtFnWzXFQaSnT5OY2SxftL4VhuB1a2377fd2"
 }

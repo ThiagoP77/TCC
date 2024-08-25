@@ -686,7 +686,7 @@ class UsuarioController extends Controller
                 //Utiliza o id_categoria para gerar o caminho e a ability correspondente
                 switch ($user->id_categoria) {
                     case 1:
-                        $caminho = '/admins';
+                        $caminho = '/adm';
                         $hab = 'admin';
 
                         //Instancia de Admin correspondente
@@ -703,7 +703,7 @@ class UsuarioController extends Controller
 
                         break;
                     case 2:
-                        $caminho = '/clientes';
+                        $caminho = '/cliente';
                         $hab = 'cliente';
 
                         //Instancia de cliente correspondente
@@ -720,7 +720,7 @@ class UsuarioController extends Controller
 
                         break;
                     case 3:
-                        $caminho = '/vendedores';
+                        $caminho = '/loja';
                         $hab = 'vendedor';
 
                         //Instancia de vendedor correspondente
@@ -737,7 +737,7 @@ class UsuarioController extends Controller
 
                         break;
                     case 4:
-                        $caminho = '/entregadores';
+                        $caminho = '/entregador';
                         $hab = 'entregador';
 
                         //Instancia de entregador correspondente
