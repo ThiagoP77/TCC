@@ -73,7 +73,7 @@ class EnderecoClienteController extends Controller
             //Percebe se houve erro na requisição e, caso tenha, envia mensagem de erro
             if ($resultado['status'] !== 200) {
                 return response()->json([
-                    'message' => $resultado['data']['mensagem'] ?? 'Erro ao consultar o CEP.',
+                    'mensagem' => $resultado['data']['mensagem'] ?? 'Erro ao consultar o CEP.',
                 ], $resultado['status']);
             }
 
@@ -103,7 +103,7 @@ class EnderecoClienteController extends Controller
 
             //Envia mensagem de sucesso caso os códigos sejam iguais
             return response()->json([
-                'message' => 'Endereço cadastrado com sucesso!',
+                'mensagem' => 'Endereço cadastrado com sucesso!',
             ], 200);
 
         } catch (Exception $e) {
@@ -126,7 +126,7 @@ class EnderecoClienteController extends Controller
             //Verifica se o id informado é númerico e existe na tabela de endereços. Caso não existe, envia mensagem de erro
             if (!is_numeric($id) || !EnderecoCliente::where('id', $id)->exists()) {
                 return response()->json([
-                    'message' => 'Endereço não encontrado.'
+                    'mensagem' => 'Endereço não encontrado.'
                 ], 404);
             }
     
@@ -139,13 +139,13 @@ class EnderecoClienteController extends Controller
                 $e->delete();//Deletando o endereço
 
                 return response()->json([//Envia mensagem de sucesso caso tudo tenha ocorrido de forma correta
-                    'message' => 'Endereço excluído com sucesso.'
+                    'mensagem' => 'Endereço excluído com sucesso.'
                 ], 200);
 
             } else {//Mensagem de erro caso não se encaixe em nenhum if
 
                 return response()->json([
-                    'message' => 'Endereço não encontrado.'
+                    'mensagem' => 'Endereço não encontrado.'
                 ], 404);
 
             }
@@ -173,7 +173,7 @@ class EnderecoClienteController extends Controller
             //Caso o usuário ou cliente não sejam encontrados, envia mensagem de erro
             if (!$u || !$cliente) {
                 return response()->json([
-                    'error' => 'Falha ao encontrar seu usuário.',
+                    'mensagem' => 'Falha ao encontrar seu usuário.',
                 ], 404);
             }
 
@@ -228,7 +228,7 @@ class EnderecoClienteController extends Controller
             //Verifica se o id informado é númerico e existe na tabela de endereços. Caso não existe, envia mensagem de erro
             if (!is_numeric($id) || !EnderecoCliente::where('id', $id)->exists()) {
                 return response()->json([
-                    'message' => 'Endereço não encontrado.'
+                    'mensagem' => 'Endereço não encontrado.'
                 ], 404);
             }
 
@@ -247,7 +247,7 @@ class EnderecoClienteController extends Controller
             //Percebe se houve erro na requisição e, caso tenha, envia mensagem de erro
             if ($resultado['status'] !== 200) {
                 return response()->json([
-                    'message' => $resultado['data']['mensagem'] ?? 'Erro ao consultar o CEP.',
+                    'mensagem' => $resultado['data']['mensagem'] ?? 'Erro ao consultar o CEP.',
                 ], $resultado['status']);
             }
 
@@ -271,7 +271,7 @@ class EnderecoClienteController extends Controller
 
             //Envia mensagem de sucesso caso os códigos sejam iguais
             return response()->json([
-                'message' => 'Endereço cadastrado com sucesso!',
+                'mensagem' => 'Endereço alterado com sucesso!',
             ], 200);
 
         } catch (Exception $e) {
@@ -279,7 +279,7 @@ class EnderecoClienteController extends Controller
             DB::rollback();//Desfaz todas as operações realizadas no banco
 
                 return response()->json([
-                    'mensagem' => 'Erro ao cadastrar endereço.',
+                    'mensagem' => 'Erro ao alterar endereço.',
                     'erro' => $e->getMessage()
                 ], 400);
 
@@ -293,7 +293,7 @@ class EnderecoClienteController extends Controller
             //Verifica se o id informado é númerico e existe na tabela de usuários. Caso não existe, envia mensagem de erro
             if (!is_numeric($id) || !EnderecoCliente::where('id', $id)->exists()) {
                     return response()->json([
-                        'message' => 'Endereço não encontrado.'
+                        'mensagem' => 'Endereço não encontrado.'
                 ], 404);
              }
 

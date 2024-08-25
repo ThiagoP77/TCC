@@ -59,14 +59,14 @@ class AvaliacaoController extends Controller
              //Caso o usuário, cliente ou loja não sejam encontrados, envia mensagem de erro
              if (!$u || !$cliente) {
                 return response()->json([
-                    'message' => 'Falha ao encontrar seu usuário.',
+                    'mensagem' => 'Falha ao encontrar seu usuário.',
                 ], 404);
             }
 
             //Verifica se o vendedor existe e, caso não, envia mensagem de erro
             if (!$vend) {
                 return response()->json([
-                    'message' => 'Falha ao encontrar o vendedor.',
+                    'mensagem' => 'Falha ao encontrar o vendedor.',
                 ], 404);
             }
 
@@ -85,7 +85,7 @@ class AvaliacaoController extends Controller
 
                 //Envia mensagem de sucesso
                 return response()->json([
-                    'message' => 'Avaliação atualizada com sucesso.'
+                    'mensagem' => 'Avaliação atualizada com sucesso.'
                 ], 200);
 
             } else {//Caso não exista, cria uma nova
@@ -99,7 +99,7 @@ class AvaliacaoController extends Controller
     
                 //Envia mensagem de sucesso
                 return response()->json([
-                    'message' => 'Avaliação registrada com sucesso.'
+                    'mensagem' => 'Avaliação registrada com sucesso.'
                 ], 200);
 
             }
@@ -131,14 +131,14 @@ class AvaliacaoController extends Controller
             //Caso o usuário, cliente ou loja não sejam encontrados, envia mensagem de erro
             if (!$u || !$cliente) {
                 return response()->json([
-                    'message' => 'Falha ao encontrar seu usuário.',
+                    'mensagem' => 'Falha ao encontrar seu usuário.',
                 ], 404);
             }
             
             //Verifica se o vendedor existe e, caso não, envia mensagem de erro
             if (!$vend) {
                 return response()->json([
-                    'message' => 'Falha ao encontrar o vendedor.',
+                    'mensagem' => 'Falha ao encontrar o vendedor.',
                 ], 404);
             }
             
@@ -157,13 +157,13 @@ class AvaliacaoController extends Controller
             
                 //Envia mensagem de sucesso
                 return response()->json([
-                    'message' => 'Avaliação excluída com sucesso.'
+                    'mensagem' => 'Avaliação excluída com sucesso.'
                 ], 200);
             
             } else {//Caso não exista, envia mensagem de erro
             
                 return response()->json([
-                    'message' => 'Você ainda não avaliou esse vendedor.'
+                    'mensagem' => 'Você ainda não avaliou esse vendedor.'
                 ], 400);
             }
 
@@ -194,14 +194,14 @@ class AvaliacaoController extends Controller
             //Caso o usuário, cliente ou loja não sejam encontrados, envia mensagem de erro
             if (!$u || !$cliente) {
                 return response()->json([
-                    'message' => 'Falha ao encontrar seu usuário.',
+                    'mensagem' => 'Falha ao encontrar seu usuário.',
                 ], 404);
             }
             
             //Verifica se o vendedor existe e, caso não, envia mensagem de erro
             if (!$vend) {
                 return response()->json([
-                    'message' => 'Falha ao encontrar o vendedor.',
+                    'mensagem' => 'Falha ao encontrar o vendedor.',
                 ], 404);
             }
             
@@ -256,7 +256,7 @@ class AvaliacaoController extends Controller
             //Verifica se o vendedor existe e, caso não, envia mensagem de erro
             if (!$vend) {
                 return response()->json([
-                    'message' => 'Falha ao encontrar o vendedor.',
+                    'mensagem' => 'Falha ao encontrar o vendedor.',
                 ], 404);
             }
 

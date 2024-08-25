@@ -56,8 +56,6 @@ class UsuarioController extends Controller
         //Recebe os dados do requeste
         $requestData = $r->all();
 
-        
-
         try {//Testa exceção
 
             // Decodifica o JSON do campo 'usuario' para um array associativo
@@ -318,7 +316,7 @@ class UsuarioController extends Controller
                 //Percebe se houve erro na requisição e, caso tenha, envia mensagem de erro
                 if ($resultado['status'] !== 200) {
                     return response()->json([
-                        'message' => $resultado['data']['mensagem'] ?? 'Erro ao consultar o CEP.',
+                        'mensagem' => $resultado['data']['mensagem'] ?? 'Erro ao consultar o CEP.',
                     ], $resultado['status']);
                 }
 
@@ -459,7 +457,7 @@ class UsuarioController extends Controller
             //Verifica se o id informado é númerico e existe na tabela de usuários. Caso não existe, envia mensagem de erro
             if (!is_numeric($id) || !Usuario::where('id', $id)->exists()) {
                 return response()->json([
-                    'message' => 'Usuário não encontrado.'
+                    'mensagem' => 'Usuário não encontrado.'
                 ], 404);
             }
     
@@ -469,14 +467,14 @@ class UsuarioController extends Controller
             //Se o usuário não for entregador ou vendedor, retorna mensagem de erro
             if ($u->id_categoria !== 3 && $u->id_categoria !== 4) {
                 return response()->json([
-                    'message' => 'O usuário não pode ser aceito porque não é vendedor e nem entregador.'
+                    'mensagem' => 'O usuário não pode ser aceito porque não é vendedor e nem entregador.'
                 ], 403);
             }
 
             //Se o usuário já for aceito, envia mensagem de erro
             if ($u->aceito_admin === 1) {
                 return response()->json([
-                    'message' => 'O usuário já está ativo, não pode ser aceito de novo.'
+                    'mensagem' => 'O usuário já está ativo, não pode ser aceito de novo.'
                 ], 403);
             }
     
@@ -501,13 +499,13 @@ class UsuarioController extends Controller
                 }
     
                 return response()->json([//Envia mensagem de sucesso caso tudo tenha ocorrido de forma correta
-                    'message' => 'Usuário aceito com sucesso.'
+                    'mensagem' => 'Usuário aceito com sucesso.'
                 ], 200);
                 
             } else {//Mensagem de erro caso não se encaixe em nenhum if
 
                 return response()->json([
-                    'message' => 'Usuário não encontrado.'
+                    'mensagem' => 'Usuário não encontrado.'
                 ], 404);
 
             }
@@ -530,7 +528,7 @@ class UsuarioController extends Controller
             //Verifica se o id informado é númerico e existe na tabela de usuários. Caso não existe, envia mensagem de erro
             if (!is_numeric($id) || !Usuario::where('id', $id)->exists()) {
                 return response()->json([
-                    'message' => 'Usuário não encontrado.'
+                    'mensagem' => 'Usuário não encontrado.'
                 ], 404);
             }
     
@@ -546,14 +544,14 @@ class UsuarioController extends Controller
             //Se o usuário não for entregador ou vendedor, retorna mensagem de erro
             if (($idCategoria !== 3 && $idCategoria !== 4)) {
                 return response()->json([
-                    'message' => 'O usuário não pode ser recusado.'
+                    'mensagem' => 'O usuário não pode ser recusado.'
                 ], 403);
             }
 
             //Se o usuário já for aceito, envia mensagem de erro
             if ($u->aceito_admin === 1) {
                 return response()->json([
-                    'message' => 'O usuário já está ativo, não pode ser recusado.'
+                    'mensagem' => 'O usuário já está ativo, não pode ser recusado.'
                 ], 403);
             }
 
@@ -586,13 +584,13 @@ class UsuarioController extends Controller
                 $u->delete();//Deletando o usuário
 
                 return response()->json([//Envia mensagem de sucesso caso tudo tenha ocorrido de forma correta
-                    'message' => 'Usuário recusado com sucesso.'
+                    'mensagem' => 'Usuário recusado com sucesso.'
                 ], 200);
 
             } else {//Mensagem de erro caso não se encaixe em nenhum if
 
                 return response()->json([
-                    'message' => 'Usuário não encontrado.'
+                    'mensagem' => 'Usuário não encontrado.'
                 ], 404);
 
             }
@@ -643,7 +641,7 @@ class UsuarioController extends Controller
             //Caso não encontre o usuário
             if (!$u) {
                 return response()->json([
-                    'error' => 'Email não registrado no sistema.',
+                    'mensagem' => 'Email não registrado no sistema.',
                 ], 404);
             }
 
@@ -697,7 +695,7 @@ class UsuarioController extends Controller
                             $id_c = $c->id;
                         } else {//Não achou
                             return response()->json([
-                                'error' => 'Falha ao logar.',
+                                'mensagem' => 'Falha ao logar.',
                             ], 404);
                         }
 
@@ -714,7 +712,7 @@ class UsuarioController extends Controller
                             $id_c = $c->id;
                         } else {//Não achou
                             return response()->json([
-                                'error' => 'Falha ao logar.',
+                                'mensagem' => 'Falha ao logar.',
                             ], 404);
                         }
 
@@ -731,7 +729,7 @@ class UsuarioController extends Controller
                             $id_c = $c->id;
                         } else {//Não achou
                             return response()->json([
-                                'error' => 'Falha ao logar.',
+                                'mensagem' => 'Falha ao logar.',
                             ], 404);
                         }
 
@@ -748,14 +746,14 @@ class UsuarioController extends Controller
                             $id_c = $c->id;
                         } else {//Não achou
                             return response()->json([
-                                'error' => 'Falha ao logar.',
+                                'mensagem' => 'Falha ao logar.',
                             ], 404);
                         }
 
                         break;
                     default://Caso não seja um id_categoria válido, envia mensagem de erro
                         return response()->json([
-                            'message' => 'Usuário inválido.'
+                            'mensagem' => 'Usuário inválido.'
                         ], 400);
                 }
     
@@ -773,7 +771,7 @@ class UsuarioController extends Controller
                 
             } else {//Envia mensagem de erro caso os dados não estejam no banco
                 return response()->json([
-                    'message' => 'Senha incorreta.'
+                    'mensagem' => 'Senha incorreta.'
                 ], 400);
             }
     
@@ -870,7 +868,7 @@ class UsuarioController extends Controller
             //Caso o usuário não seja encontrado, envia mensagem de erro
             if (!$u) {
                 return response()->json([
-                    'error' => 'Email não registrado no sistema.',
+                    'mensagem' => 'Email não registrado no sistema.',
                 ], 404);
             }
 
@@ -922,7 +920,7 @@ class UsuarioController extends Controller
                 }
 
                 return response()->json([//Envia mensagem de sucesso
-                    'message' => 'Enviado e-mail com instruções para recuperar a senha!',
+                    'mensagem' => 'Enviado e-mail com instruções para recuperar a senha!',
                 ], 200);
 
             } catch (Exception $e) {//Captura exceção e envia mensagem de erro
@@ -972,7 +970,7 @@ class UsuarioController extends Controller
             //Caso não sejam equivalentes, envia mensagem de erro
             if (!$valid['status']) {
                 return response()->json([
-                    'message' => $valid['message'],
+                    'mensagem' => $valid['message'],
                 ], 400);
             }
     
@@ -982,13 +980,13 @@ class UsuarioController extends Controller
             //Caso não ache o usuário, envia mensagem de erro
             if (!$u) {
                 return response()->json([
-                    'message' => 'Usuário não encontrado!',
+                    'mensagem' => 'Usuário não encontrado!',
                 ], 400);
             }
     
             //Envia mensagem de sucesso caso os códigos sejam iguais
             return response()->json([
-                'message' => 'Código válido!',
+                'mensagem' => 'Código válido!',
             ], 200);
     
         } catch (Exception $e) {//Captura exceção e envia mensagem de erro
@@ -1039,7 +1037,7 @@ class UsuarioController extends Controller
             //Caso não sejam equivalentes, envia mensagem de erro
             if (!$valid['status']) {
                 return response()->json([
-                    'message' => $valid['message'],
+                    'mensagem' => $valid['message'],
                 ], 400);
             }
     
@@ -1049,7 +1047,7 @@ class UsuarioController extends Controller
             //Caso não ache o usuário, envia mensagem de erro
             if (!$u) {
                 return response()->json([
-                    'message' => 'Usuário não encontrado!',
+                    'mensagem' => 'Usuário não encontrado!',
                 ], 400);
             }
     
@@ -1068,12 +1066,12 @@ class UsuarioController extends Controller
     
             return response()->json([//Envia mensagem de sucesso de reset de senha
                 'status' => true,
-                'message' => 'Senha atualizada com sucesso!',
+                'mensagem' => 'Senha atualizada com sucesso!',
             ], 200);
     
         } catch (Exception $e) {//Captura exceção e envia mensagem de erro
             return response()->json([
-                'message' => 'Não foi possível alterar a senha.',
+                'mensagem' => 'Não foi possível alterar a senha.',
                 'erro' => $e->getMessage()
             ], 400);
         }
@@ -1086,7 +1084,7 @@ class UsuarioController extends Controller
             //Verifica se o id informado é númerico e existe na tabela de usuários. Caso não existe, envia mensagem de erro
             if (!is_numeric($id) || !Usuario::where('id', $id)->exists()) {
                 return response()->json([
-                    'message' => 'Usuário não encontrado.'
+                    'mensagem' => 'Usuário não encontrado.'
                 ], 404);
             }
 
@@ -1116,7 +1114,7 @@ class UsuarioController extends Controller
 
                     } else {//Não achou
                         return response()->json([
-                            'message' => 'Falha ao mostrar dados.',
+                            'mensagem' => 'Falha ao mostrar dados.',
                         ], 404);
                     }
 
@@ -1141,7 +1139,7 @@ class UsuarioController extends Controller
 
                     } else {//Não achou
                         return response()->json([
-                            'message' => 'Falha ao mostrar dados.',
+                            'mensagem' => 'Falha ao mostrar dados.',
                         ], 404);
                     }
 
@@ -1169,7 +1167,7 @@ class UsuarioController extends Controller
 
                     } else {//Não achou
                         return response()->json([
-                            'message' => 'Falha ao mostrar dados.',
+                            'mensagem' => 'Falha ao mostrar dados.',
                         ], 404);
                     }
 
@@ -1198,20 +1196,20 @@ class UsuarioController extends Controller
 
                     } else {//Não achou
                         return response()->json([
-                            'message' => 'Falha ao mostrar dados.',
+                            'mensagem' => 'Falha ao mostrar dados.',
                         ], 404);
                     }
 
                 default://Caso não seja um id_categoria válido, envia mensagem de erro
                     return response()->json([
-                        'message' => 'Usuário inválido.'
+                        'mensagem' => 'Usuário inválido.'
                     ], 400);
             }
 
 
         } catch (Exception $e) {//Captura exceção e envia mensagem de erro
             return response()->json([
-                'message' => 'Não foi possível pegar os dados.',
+                'mensagem' => 'Não foi possível pegar os dados.',
                 'erro' => $e->getMessage()
             ], 400);
         }
@@ -1225,7 +1223,7 @@ class UsuarioController extends Controller
             //Verifica se o id informado é númerico e existe na tabela de usuários. Caso não existe, envia mensagem de erro
             if (!is_numeric($id) || !Usuario::where('id', $id)->exists()) {
                 return response()->json([
-                    'message' => 'Usuário não encontrado.'
+                    'mensagem' => 'Usuário não encontrado.'
                 ], 404);
             }
     
@@ -1239,7 +1237,7 @@ class UsuarioController extends Controller
             //Se o usuário não for entregador ou vendedor, retorna mensagem de erro
             if (($idCategoria == 1)) {
                 return response()->json([
-                    'message' => 'O usuário é admin e não pode ser excluído.'
+                    'mensagem' => 'O usuário é admin e não pode ser excluído.'
                 ], 403);
             }
 
@@ -1263,13 +1261,13 @@ class UsuarioController extends Controller
                 $u->delete();//Deletando o usuário
 
                 return response()->json([//Envia mensagem de sucesso caso tudo tenha ocorrido de forma correta
-                    'message' => 'Usuário excluído com sucesso.'
+                    'mensagem' => 'Usuário excluído com sucesso.'
                 ], 200);
 
             } else {//Mensagem de erro caso não se encaixe em nenhum if
 
                 return response()->json([
-                    'message' => 'Usuário não encontrado.'
+                    'mensagem' => 'Usuário não encontrado.'
                 ], 404);
 
             }

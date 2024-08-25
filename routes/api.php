@@ -58,8 +58,8 @@ Route::prefix('admins')->middleware(['auth:sanctum', 'abilities:admin'])->group(
     //Rotas de aceitar ou não vendedor e entregador no site
     Route::get('/entregadoresAguardando', [EntregadorController::class, 'entregadoresAguardandoAceitar']);//Lista os entregadores ainda não aceitos no site
     Route::get('/vendedoresAguardando', [VendedorController::class, 'vendedoresAguardandoAceitar']);//Lista os vendedores ainda não aceitos no site
-    Route::put('/aceitaradmin/{id}', [UsuarioController::class, 'aceitarAdmin']);//Aceita o vendedor ou entregador correspondente ao id inserido
-    Route::delete('/recusaradmin/{id}', [UsuarioController::class, 'recusarAdmin']);//Rejeita o vendedor ou entregador correspondente ao id inserido, além de excluir seus dados
+    Route::put('/aceitarAdmin/{id}', [UsuarioController::class, 'aceitarAdmin']);//Aceita o vendedor ou entregador correspondente ao id inserido
+    Route::delete('/recusarAdmin/{id}', [UsuarioController::class, 'recusarAdmin']);//Rejeita o vendedor ou entregador correspondente ao id inserido, além de excluir seus dados
 
     //Rota de exclusão de usuário
     Route::delete('/excluirUsuario/{id}', [UsuarioController::class, 'excluirUsuario']);//Excluir usuário não admin

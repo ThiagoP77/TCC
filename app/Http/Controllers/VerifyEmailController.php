@@ -71,7 +71,7 @@ class VerifyEmailController extends Controller
             //Caso o usuário não seja encontrado, envia mensagem de erro
             if (!$u) {
                 return response()->json([
-                    'error' => 'Email não registrado no sistema.',
+                    'mensagem' => 'Email não registrado no sistema.',
                 ], 404);
             }
 
@@ -89,7 +89,7 @@ class VerifyEmailController extends Controller
  
             //Envia mensagem de sucesso
             return response()->json([
-                'message' => 'Email de verificação enviado!',
+                'mensagem' => 'Email de verificação enviado!',
             ], 200);
 
         } catch (Exception $e) {//Captura erro e envia mensagem de erro
