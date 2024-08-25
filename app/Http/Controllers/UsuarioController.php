@@ -17,12 +17,12 @@ use App\Rules\CnpjValidacao;
 use App\Rules\CpfValidacao;
 use App\Rules\EmailValidacao;
 use App\Rules\TelWhaValidacao;
-use App\Service\ConsultaCEPService;
-use App\Service\ValidarCodigoService;
+use App\Services\ConsultaCEPService;
+use App\Services\ExcluirTokensExpiradosService;
+use App\Services\ValidarCodigoService;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Auth\Events\Registered;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -758,8 +758,14 @@ class UsuarioController extends Controller
                 }
     
                 //Gera um token de acesso com a ability fornecida
-                $token = $r->user()->createToken('token', [$hab])->plainTextToken;
+                $token = $r->user()->createToken('token', [$hab], now()->addWeek())->plainTextToken;
     
+                //Instância do serviço de excluir tokens expirados
+                $excluir = new ExcluirTokensExpiradosService();
+
+                //Exclui os tokens
+                $excluir->excluirTokensExpirados();
+
                 //Envia mensagem de sucesso com informações necessárias para navegação no site
                 return response()->json([
                     'message' => true,

@@ -7,7 +7,7 @@ namespace App\Http\Controllers;
 use App\Models\Api\Cliente;
 use App\Models\Api\EnderecoCliente;
 use App\Rules\CepValidacao;
-use App\Service\ConsultaCEPService;
+use App\Services\ConsultaCEPService;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;

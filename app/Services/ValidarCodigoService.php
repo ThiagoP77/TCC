@@ -1,7 +1,7 @@
 <?php
 
 //Namespace
-namespace App\Service;
+namespace App\Services;
 
 //Namespaces utilizados
 use Carbon\Carbon;

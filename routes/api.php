@@ -3,7 +3,7 @@
 //Namespaces utilizados
 use App\Http\Controllers\AvaliacaoController;
 use App\Http\Controllers\CategoriaUsuarioController;
-use App\Http\Controllers\CepController;
+use App\Http\Controllers\ClienteController;
 use App\Http\Controllers\EnderecoClienteController;
 use App\Http\Controllers\EntregadorController;
 use App\Http\Controllers\MetodoPagamentoController;
@@ -12,7 +12,6 @@ use App\Http\Controllers\UsuarioController;
 use App\Http\Controllers\VendedorController;
 use App\Http\Controllers\VerifyEmailController;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Storage;
 
 /*
 Route::get('/users', function (Request $request) {
@@ -31,6 +30,9 @@ Route::get('/tiposveiculo', [TipoVeiculoController::class, 'tiposVeiculo']);
 
 //Informa a média de avaliações de uma loja e a quantidade de pessoas que avaliou
 Route::get('/avaliacoesLoja/{id_loja}', [AvaliacaoController::class, 'mediaAvaliacao'])->middleware(['auth:sanctum']);
+
+//Rota de listar os vendedores do site
+Route::get('/listarVendedores', [VendedorController::class, 'listarVendedores'])->middleware(['auth:sanctum']);
 
 //Rotas com funções básicas de usuário
 Route::prefix('usuarios')->group(function () {
@@ -63,6 +65,10 @@ Route::prefix('admins')->middleware(['auth:sanctum', 'abilities:admin'])->group(
 
     //Rota de exclusão de usuário
     Route::delete('/excluirUsuario/{id}', [UsuarioController::class, 'excluirUsuario']);//Excluir usuário não admin
+
+    //Rotas de listar tipo de usuário
+    Route::get('/listarClientes', [ClienteController::class, 'listarClientes']);//Lista os clientes do site
+    Route::get('/listarEntregadores', [EntregadorController::class, 'listarEntregadores']);//Lista os entregadores do site
 });
 
 //Rotas utilizadas por usuários cliente

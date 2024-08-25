@@ -23,7 +23,7 @@ class EntregadorController extends Controller
               ->where('aceito_admin', 0)
 
               ->with(['entregador' => function($query) {
-                  $query->select('id_usuario', 'telefone', 'placa', 'id_tipo_veiculo')
+                  $query->select('id', 'id_usuario', 'telefone', 'placa', 'id_tipo_veiculo')
                         ->with('tipoVeiculo:id,nome');
               }])
 
@@ -37,6 +37,35 @@ class EntregadorController extends Controller
 
             return response()->json([
                 'mensagem' => 'Falha ao carregar os entregadores que aguardam aceitação.',
+                'erro' => $e->getMessage()
+            ], 400);
+
+        }
+    }
+
+    //Função de listar entregadores
+    public function listarEntregadores () {
+        try {//Testa erro
+
+            //Código que lista os entregadores
+            $e = Usuario::where('id_categoria', 4)
+            ->where('aceito_admin', 1)
+
+            ->with(['entregador' => function($query) {
+                $query->select('id', 'id_usuario', 'telefone', 'placa', 'id_tipo_veiculo')
+                      ->with('tipoVeiculo:id,nome');
+            }])
+
+            ->select('id', 'nome', 'email', 'cpf', 'foto_login')
+            ->orderBy('id')
+            ->get();
+
+            return response()->json($e, 200);//Retorno de sucesso em json
+
+        } catch (Exception $e) {//Captura exceção e envia mensagem de erro
+
+            return response()->json([
+                'mensagem' => 'Falha ao carregar os entregadores.',
                 'erro' => $e->getMessage()
             ], 400);
 
