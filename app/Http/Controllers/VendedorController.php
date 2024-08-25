@@ -91,7 +91,7 @@ class VendedorController extends Controller
         } catch (Exception $e) {//Captura exceção e envia mensagem de erro
     
             return response()->json([
-                'mensagem' => 'Falha ao carregar os vendedores.',
+                'mensagem' => 'Falha ao carregar as lojas.',
                 'erro' => $e->getMessage()
             ], 400);
     
