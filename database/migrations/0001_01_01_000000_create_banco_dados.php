@@ -133,7 +133,7 @@ return new class extends Migration
             $table->decimal('preco', 10, 2)->check('preco >= 0');//Decimal preco (preco básico do produto)
             $table->decimal('preco_atual', 10, 2)->check('preco_atual >= 0');//Decimal preco_atual (preco do produto com desconto)
             $table->decimal('desconto', 5, 2)->default(0.00);//Decimal com o valor do desconto
-            $table->string('imagem_produto')->nullable();//String com a url de foto de perfil (tem uma default caso não seja adicionada)
+            $table->string('imagem_produto')->nullable()->default('storage/imagens_produtos/imagem_default_produto.png');//String com a url de foto de perfil (tem uma default caso não seja adicionada)
             $table->unsignedInteger('qtde_estoque')->default(0)->check('qtd_estoque >= 0');//Integer com a quantidade em estoque do produto
             $table->timestamps();//Data de criação e alteração do registro
 
