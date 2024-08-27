@@ -1162,6 +1162,147 @@ class UsuarioController extends Controller
         }
     }
 
+        //Função de mostrar os dados do usuário por token
+        public function exibirPerfil (Request $r) {
+            try{//Testa se tem exceção
+    
+                //Obtém o usuário autenticado
+                $u = $r->user(); 
+
+                //Caso o usuário, cliente ou loja não sejam encontrados, envia mensagem de erro
+                if (!$u) {
+                    return response()->json([
+                        'mensagem' => 'Usuário não encontrado.',
+                    ], 404);
+                }
+
+                //Pegando id
+                $id = $u->id;
+    
+                //Utiliza o id_categoria para pegar os dados correspondentes
+                switch ($u->id_categoria) {
+                    case 1:
+    
+                        //Instancia de Admin correspondente
+                        $c = $u->admin;
+    
+                        //Pega id
+                        if ($c) {
+    
+                            //Pegando os dados e enviando resposta de sucesso
+                            $resposta = Usuario::where('id', $id)
+              
+                            ->with(['categoria:id,nome'])
+                            ->with(['admin:id,id_usuario'])
+              
+                            ->select('id', 'nome', 'email', 'cpf', 'foto_login', 'id_categoria')
+                            ->get();
+    
+                            return response()->json($resposta);
+    
+                        } else {//Não achou
+                            return response()->json([
+                                'mensagem' => 'Falha ao mostrar dados.',
+                            ], 404);
+                        }
+    
+                    case 2:
+    
+                        //Instancia de cliente correspondente
+                        $c = $u->cliente;
+    
+                        //Pega id
+                        if ($c) {
+    
+                            //Pegando os dados e enviando resposta de sucesso
+                            $resposta = Usuario::where('id', $id)
+              
+                            ->with(['categoria:id,nome'])
+                            ->with(['cliente:id,id_usuario,telefone'])
+              
+                            ->select('id', 'nome', 'email', 'cpf', 'foto_login', 'id_categoria')
+                            ->get();
+    
+                            return response()->json($resposta);
+    
+                        } else {//Não achou
+                            return response()->json([
+                                'mensagem' => 'Falha ao mostrar dados.',
+                            ], 404);
+                        }
+    
+                    case 3:
+    
+                        //Instancia de vendedor correspondente
+                        $c = $u->vendedor;
+    
+                        //Pega id
+                        if ($c) {
+    
+                            //Pegando os dados e enviando resposta de sucesso
+                            $resposta = Usuario::where('id', $id)
+              
+                            ->with(['categoria:id,nome'])
+                            ->with(['vendedor' => function($query) {
+                                $query->select('id','id_usuario', 'telefone', 'whatsapp', 'cnpj', 'descricao')
+                                      ->with('endereco:id_vendedor,cep,logradouro,bairro,localidade,uf,numero');
+                                }])
+              
+                            ->select('id', 'nome', 'email', 'cpf', 'foto_login', 'id_categoria')
+                            ->get();
+    
+                            return response()->json($resposta);
+    
+                        } else {//Não achou
+                            return response()->json([
+                                'mensagem' => 'Falha ao mostrar dados.',
+                            ], 404);
+                        }
+    
+                    case 4:
+    
+                        //Instancia de entregador correspondente
+                        $c = $u->entregador;
+    
+                        //Pega id
+                        if ($c) {
+    
+                            //Pegando os dados e enviando resposta de sucesso
+                            $resposta = Usuario::where('id', $id)
+              
+                            ->with(['categoria:id,nome'])
+    
+                            ->with(['entregador' => function($query) {
+                                $query->select('id_usuario', 'telefone', 'placa', 'id_tipo_veiculo')
+                                      ->with('tipoVeiculo:id,nome');
+                            }])
+              
+                            ->select('id', 'nome', 'email', 'cpf', 'foto_login', 'id_categoria')
+                            ->get();
+    
+                            return response()->json($resposta);
+    
+                        } else {//Não achou
+                            return response()->json([
+                                'mensagem' => 'Falha ao mostrar dados.',
+                            ], 404);
+                        }
+    
+                    default://Caso não seja um id_categoria válido, envia mensagem de erro
+                        return response()->json([
+                            'mensagem' => 'Usuário inválido.'
+                        ], 400);
+                }
+    
+    
+            } catch (Exception $e) {//Captura exceção e envia mensagem de erro
+                return response()->json([
+                    'mensagem' => 'Não foi possível pegar os dados.',
+                    'erro' => $e->getMessage()
+                ], 400);
+            }
+        }
+
     //Função de excluir usuário por id
     public function excluirUsuario ($id) {
 

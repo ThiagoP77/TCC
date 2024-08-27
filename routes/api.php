@@ -4,6 +4,7 @@
 use App\Http\Controllers\AvaliacaoController;
 use App\Http\Controllers\CategoriaUsuarioController;
 use App\Http\Controllers\ClienteController;
+use App\Http\Controllers\CoisasUteisController;
 use App\Http\Controllers\EnderecoClienteController;
 use App\Http\Controllers\EntregadorController;
 use App\Http\Controllers\MetodoPagamentoController;
@@ -28,6 +29,9 @@ Route::get('/metodospagamento', [MetodoPagamentoController::class, 'metodosPagam
 //Rota para exibir todos os tipos de veiculo
 Route::get('/tiposveiculo', [TipoVeiculoController::class, 'tiposVeiculo']);
 
+//Rota que pesquisa CEP
+Route::post('/procurarCEP', [CoisasUteisController::class, 'procurarCEP']);
+
 //Informa a média de avaliações de uma loja e a quantidade de pessoas que avaliou
 Route::get('/avaliacoesLoja/{id_loja}', [AvaliacaoController::class, 'mediaAvaliacao'])->middleware(['auth:sanctum']);
 
@@ -39,7 +43,8 @@ Route::prefix('usuarios')->group(function () {
 
     //Rotas de manipulação de usuários
     Route::post('/cadastro', [UsuarioController::class, 'cadastro']);//Realizar cadastro de novo usuário
-    Route::get('/dadosUsuario/{id}', [UsuarioController::class, 'dadosUsuario'])->middleware(['auth:sanctum']);//Pegar dados do usuário
+    Route::get('/dadosUsuario/{id}', [UsuarioController::class, 'dadosUsuario'])->middleware(['auth:sanctum']);//Pegar dados do usuário por id
+    Route::get('/perfil', [UsuarioController::class, 'exibirPerfil'])->middleware(['auth:sanctum']);//Pegar dados do usuário logado
     Route::get('/fotoUsuario/{id}', [UsuarioController::class, 'fotoUsuario'])->middleware(['auth:sanctum']);//Pegar foto do usuário
 
     //Rotas do sistema de login

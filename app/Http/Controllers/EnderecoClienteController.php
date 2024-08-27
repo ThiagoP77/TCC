@@ -119,7 +119,7 @@ class EnderecoClienteController extends Controller
     }
 
     //Função de excluir endereço
-    public function excluirEndereco ($id) {
+    public function excluirEndereco (Request $r, $id) {
         
         try {//Testa exceção
 
@@ -128,6 +128,19 @@ class EnderecoClienteController extends Controller
                 return response()->json([
                     'mensagem' => 'Endereço não encontrado.'
                 ], 404);
+            }
+
+            //Obtém o usuário autenticado
+            $user = $r->user(); 
+
+            //Obtém o cliente
+            $cliente = $user->cliente;
+
+            //Verifica se o id informado é númerico e existe na tabela de endereços. Caso não existe, envia mensagem de erro
+            if (!EnderecoCliente::where('id', $id)->where('id_cliente', $cliente->id)->exists()) {
+                return response()->json([
+                    'mensagem' => 'Endereço não pertence a esse cliente.'
+                ], 401);
             }
     
             //Encontra o endereço informado pelo id
@@ -230,6 +243,19 @@ class EnderecoClienteController extends Controller
                 return response()->json([
                     'mensagem' => 'Endereço não encontrado.'
                 ], 404);
+            }
+
+            //Obtém o usuário autenticado
+            $user = $r->user(); 
+
+            //Obtém o cliente
+            $cliente = $user->cliente;
+            
+            //Verifica se o id informado é númerico e existe na tabela de endereços. Caso não existe, envia mensagem de erro
+            if (!EnderecoCliente::where('id', $id)->where('id_cliente', $cliente->id)->exists()) {
+                return response()->json([
+                    'mensagem' => 'Endereço não pertence a esse cliente.'
+                ], 401);
             }
 
             //Instancia do serviço de consultar CEP
