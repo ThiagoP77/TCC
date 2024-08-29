@@ -31,7 +31,6 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
-use Laravel\Sanctum\PersonalAccessToken;
 
 //Classe de controle de "usuarios"
 class UsuarioController extends Controller
@@ -1396,4 +1395,588 @@ class UsuarioController extends Controller
             ], 400);
         }
     }
+
+    //Função de excluir imagem de perfil
+    public function excluirFoto (Request $r) {
+        try {//Testa se tem exceção
+
+            //Recupera o usuário logado pelo token
+            $u = $r->user();
+
+            //Caso o usuário não seja encontrado, envia mensagem de erro
+            if (!$u) {
+                return response()->json([
+                    'mensagem' => 'Usuário não encontrado.',
+                ], 404);
+            }
+
+            //Pega a URL da imagem do usuário
+            $fotoURL = $u->foto_login;
+
+            //URL da imagem default do site
+            $defaultURL = 'storage/imagens_usuarios/imagem_default_usuario.jpg';
+
+            //Verificar se a foto existe e é a default e, se não for, exclui ela do site
+            if ($fotoURL && $fotoURL !== $defaultURL) {
+
+                $p = str_replace('storage/', '', $fotoURL);
+
+                if (Storage::disk('public')->exists($p)) {
+                    Storage::disk('public')->delete($p);//Excluindo ela
+                }
+
+            } else {
+                return response()->json([//Envia mensagem de erro caso a imagem seja a default
+                    'mensagem' => 'Nenhuma imagem para ser excluída.'
+                ], 400);
+            }
+
+            //Define a imagem do usuário como a default e salva
+            $u->foto_login = 'storage/imagens_usuarios/imagem_default_usuario.jpg';
+            $u->save();
+
+            return response()->json([//Envia mensagem de sucesso caso tudo tenha ocorrido de forma correta
+                'mensagem' => 'Imagem de usuário excluída com sucesso.'
+            ], 200);
+
+        } catch (Exception $e){//Captura exceção e envia mensagem de erro
+
+            return response()->json([
+                'mensagem' => 'Não foi possível excluir a imagem.',
+                'erro' => $e->getMessage()
+            ], 400);
+
+        }
+    }
+
+    //Função de alterar foto do perfil
+    public function alterarFoto (Request $r): JsonResponse {
+        try {//Testa se tem exceção
+
+            //Recupera usuário logado pelo token
+            $u = $r->user();
+
+            //Caso o usuário não seja encontrado, envia mensagem de erro
+            if (!$u) {
+                return response()->json([
+                    'mensagem' => 'Usuário não encontrado.',
+                ], 404);
+            }
+
+            //Realiza as validações fornecidas para a imagem de usuário
+            $validator = Validator::make($r->all(), [
+                'imagem' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:16384'
+            ]);
+
+            //Caso tenha erro na validação, envia mensagem de erro
+            if ($validator->fails()) {
+                return response()->json(['errors' => $validator->errors()], 422); 
+            }
+
+            //Captura a URL da imagem do usuário
+            $fotoURL = $u->foto_login;
+
+            //URL da imagem default do site
+            $defaultURL = 'storage/imagens_usuarios/imagem_default_usuario.jpg';
+
+            //Verificar se a foto existe e é a default e, se não for, exclui ela do site
+            if ($fotoURL && $fotoURL !== $defaultURL) {
+
+                $p = str_replace('storage/', '', $fotoURL);
+
+                if (Storage::disk('public')->exists($p)) {
+                    Storage::disk('public')->delete($p);//Excluindo ela
+                }
+
+            } 
+
+            //Verifica se a imagem foi adicionada ou é a default e, caso não seja, adiciona ela no diretório público
+            if ($r->hasFile('imagem') && $r->file('imagem')->isValid()) {
+                $path = $r->file('imagem')->store('imagens_usuarios', 'public');//Salva a imagem no diretório
+                $u->foto_login = 'storage/'.$path;
+            } 
+
+            $u->save();//Salvando o usuário
+
+            return response()->json([//Envia mensagem de sucesso caso tudo tenha ocorrido de forma correta
+                'mensagem' => 'Imagem de usuário alterada com sucesso.'
+            ], 200);
+            
+
+        } catch (Exception $e){//Captura exceção e envia mensagem de erro
+
+            return response()->json([
+                'mensagem' => 'Não foi possível alterar a imagem.',
+                'erro' => $e->getMessage()
+            ], 400);
+
+        }
+    }
+
+    //Função de alterar dados do usuário
+    public function alterarUsuario (Request $r) {
+        try {//Testa se tem exceção
+
+            //Pega o usuário logado pelo token
+            $u = $r->user();
+
+            //Caso o usuário não seja encontrado, envia mensagem de erro
+            if (!$u) {
+                return response()->json([
+                    'mensagem' => 'Usuário não encontrado.',
+                ], 404);
+            }
+
+            //Realiza as validações fornecidas para os campos gerais de usuário
+            $validator = Validator::make($r->all(), [
+                'nome' => [
+                    'required',
+                    'string',
+                    'min:3',
+                    'max:50',
+                    'regex:/^(?=.*\p{L})(?!.*  )[ \p{L}]+$/u'
+                ],
+        
+                'email' => [
+                    'required',
+                    'email',
+                    new EmailValidacao()
+                ],
+        
+            ], [//Mensagens de erro personalizadas
+                'nome.regex' => 'Nome não pode conter caracteres especiais.',
+            ]);
+    
+            //Caso haja falhas no primeiro validator, envia json de erro
+            if ($validator->fails()) {
+                return response()->json(['errors' => $validator->errors()], 422); 
+            }
+    
+            //Recebe os dados validados
+            $dadosValidadosU = $validator->validated();
+
+            //Recebe a categoria de usuário
+            $id_categoria = $u->id_categoria;
+
+            //Variável booleana para verificar se o email foi alterado
+            $teste_email = false;
+    
+            //Cliente caso o id_categoria seja 2
+            if($id_categoria == 2) {
+    
+                //Validação dos dados específicos de cliente
+                $validator = Validator::make($r->all(), [
+                    'telefone' => [
+                        'required',
+                        'string',
+                        'size:15',
+                        'regex:/^\(\d{2}\) \d{5}-\d{4}$/',
+                        new TelWhaValidacao()
+                    ],
+                ], [//Mensagens de erro personalizadas
+                    'telefone.regex' => 'O telefone deve seguir o formato (XX) XXXXX-XXXX.',
+                ]);
+    
+                //Caso haja falhas no validator, envia json de erro
+                if ($validator->fails()) {
+                    return response()->json(['errors' => $validator->errors()], 422);
+                }
+            
+                //Recebe os dados validados
+                $dadosValidados = $validator->validated();
+    
+                //Junta os dados gerais e os específicos em um só
+                $dadosValidados = array_merge($dadosValidadosU, $dadosValidados);
+    
+                try {//Testa exceção
+    
+                    DB::beginTransaction();//Inicia a operação no banco
+    
+                    $u->nome = $dadosValidados['nome'];//Recebe nome
+
+                    //Verifica se o email foi alterado
+                    if ($dadosValidados['email'] != $u->email) {
+
+                        //Usa Eloquent para verificar a existência do e-mail
+                        $emailExiste = Usuario::where('email', $dadosValidados['email'])->exists();
+        
+                        //Se existir, retorna mensagem de erro
+                        if ($emailExiste) {
+        
+                            return response()->json([
+                                'mensagem' => 'Email já registrado no sistema.',
+                            ], 400);
+        
+                        } else {//Caso não exista, usuário recebe o email e ele precisa ser verificado
+                            $u->email = $dadosValidados['email'];
+                            $u->email_verified_at = null;
+                            $teste_email = true;
+                        }
+                    } else {//Usuário continua com seu email
+                        $u->email = $dadosValidados['email'];
+                    }
+
+                    $u->save();//Salvando o usuário
+    
+                    //Cliente relacionado ao usuário
+                    $cliente = $u->cliente;
+
+                    //Caso não encontre, envia mensagem de erro
+                    if (!$cliente) {
+                        return response()->json([
+                            'mensagem' => 'Usuário não encontrado.',
+                        ], 404);
+                    }
+
+                    $cliente->telefone = $dadosValidados['telefone'];//Recebe o telefone
+                    $cliente->save();//Salvando cliente
+    
+                    DB::commit();//Fazendo commit da operação
+    
+                    if ($teste_email) {//Sucesso e email alterado
+                        event(new Registered($u));//Enviando email de verificação
+
+                        return response()->json([
+                            'mensagem' => 'Dados alterados com sucesso. Certifique-se de verificar seu novo email antes de realizar login!'
+                        ], 200);
+
+                    } else {//Sucesso
+                        return response()->json([
+                            'mensagem' => 'Dados alterados com sucesso.'
+                    ], 200);
+                    }
+    
+                } catch (Exception $e) {//Captura exceção e envia mensagem de erro
+    
+                    DB::rollback();//Desfaz todas as operações realizadas no banco
+    
+                    return response()->json([
+                        'mensagem' => 'Erro ao alterar dados.',
+                        'erro' => $e->getMessage()
+                    ], 400);
+                }
+            } 
+            
+            //Vendedor caso o id_categoria seja 3
+            else if ($id_categoria == 3) {
+    
+                //Validação dos dados específicos de vendedor
+                $validator = Validator::make($r->all(), [
+                    'telefone' => [
+                        'required',
+                        'string',
+                        'size:15',
+                        'regex:/^\(\d{2}\) \d{5}-\d{4}$/',
+                        new TelWhaValidacao
+                    ],
+            
+                    'whatsapp' => [
+                        'nullable',
+                        'string',
+                        'size:15',
+                        'regex:/^\(\d{2}\) \d{5}-\d{4}$/',
+                        new TelWhaValidacao
+                    ],
+            
+                    'cnpj' => [
+                        'nullable',
+                        'string',
+                        'size:18',
+                        new CnpjValidacao
+                    ],
+    
+                    'cep' => [
+                        'required', 
+                        'string', 
+                        new CepValidacao
+                    ],
+    
+                    'numero' => [
+                        'required', 
+                        'string', 
+                        'regex:/^\d+$/'
+                    ],
+    
+                    'descricao' => [
+                        'nullable', 
+                        'string', 
+                        'max:200'
+                    ],
+                ], [//Mensagens de erro personalizadas
+                    'telefone.regex' => 'O telefone deve seguir o formato (XX) XXXXX-XXXX.',
+                    'whatsapp.regex' => 'O Whatsapp deve seguir o formato (XX) XXXXX-XXXX.',
+                    'numero.regex' => 'O número deve conter apenas números.',
+                    'numero.required' => 'O campo número é obrigatório.',
+                    'numero.string' => 'O número deve ser uma string.',
+                    'descricao.string' => 'O campo descrição deve ser uma string.',
+                    'descricao.max' => 'A descrição não pode passar de 200 caracteres.'
+                ]);
+    
+                
+                //Caso haja falhas no validator, envia json de erro
+                if ($validator->fails()) {
+                    return response()->json(['errors' => $validator->errors()], 422);
+                }
+            
+                //Recebe os dados validados
+                $dadosValidados = $validator->validated();
+    
+                //Junta os dados gerais e os específicos em um só
+                $dadosValidados = array_merge($dadosValidadosU, $dadosValidados);
+    
+                try {//Testa exceção
+    
+                    DB::beginTransaction();//Inicia a operação no banco
+    
+                    //Criação do usuário com seus campos do resquest
+                    $u->nome = $dadosValidados['nome'];
+                    
+                    //Verifica se o email foi alterado
+                    if ($dadosValidados['email'] != $u->email) {
+
+                        // Usa Eloquent para verificar a existência do e-mail
+                        $emailExiste = Usuario::where('email', $dadosValidados['email'])->exists();
+        
+                        //Se existir, retorna mensagem de erro
+                        if ($emailExiste) {
+        
+                            return response()->json([
+                                'mensagem' => 'Email já registrado no sistema.',
+                            ], 400);
+        
+                        } else {//Caso não exista, recebe o email e precisa de verificação
+                            $u->email = $dadosValidados['email'];
+                            $u->email_verified_at = null;
+                            $teste_email = true;
+                        }
+                    } else {//Continua com o email antigo
+                        $u->email = $dadosValidados['email'];
+                    }
+
+                    $u->save();//Salvando o usuário
+    
+                    //Vendedor associado ao usuário
+                    $vendedor = $u->vendedor;
+                    
+                    //Caso não encontre, retorna mensagem de erro
+                    if (!$vendedor) {
+                        return response()->json([
+                            'mensagem' => 'Usuário não encontrado.',
+                        ], 404);
+                    }
+
+                    //Recebendo dados
+                    $vendedor->telefone = $dadosValidados['telefone'];
+                    $vendedor->whatsapp = $dadosValidados['whatsapp'];
+                    
+                    //Verifica se o CNPJ esta preenchido e é único
+                    if (!empty($dadosValidados['cnpj']) && $dadosValidados['cnpj'] != $vendedor->cnpj) {
+
+                        //Usa Eloquent para verificar a existência do cnpj
+                        $cnpjExiste = Vendedor::where('cnpj', $dadosValidados['cnpj'])->exists();
+        
+                        //Se existir, envia mensagem de erro
+                        if ($cnpjExiste) {
+        
+                            return response()->json([
+                                'mensagem' => 'CNPJ já registrado no sistema.',
+                            ], 400);
+        
+                        } else {//Caso não exista, recebe ele
+                            $vendedor->cnpj = $dadosValidados['cnpj'];
+                        }
+
+                    } else if (empty($dadosValidados['cnpj'])) {//Se for vazio, recebe null
+                        $vendedor->cnpj = $dadosValidados['cnpj'];
+                    }
+
+                    $vendedor->descricao = $dadosValidados['descricao'];
+                    $vendedor->save();//Salvando vendedor
+    
+                    //Instancia do serviço de consultar CEP
+                    $consultaCepService = $this->consultaCepService;
+    
+                    //Recebe o CEP informado
+                    $cep = $dadosValidados['cep'];
+            
+                    //Consulta o CEP e recebe o resultado
+                    $resultado = $consultaCepService->consultarCep($cep);
+    
+                    //Percebe se houve erro na requisição e, caso tenha, envia mensagem de erro
+                    if ($resultado['status'] !== 200) {
+                        return response()->json([
+                            'mensagem' => $resultado['data']['mensagem'] ?? 'Erro ao consultar o CEP.',
+                        ], $resultado['status']);
+                    }
+    
+                    //Recebe os dados do endereço
+                    $cepData = $resultado['data'];
+    
+                    //Endereço associado ao vendedor recebe os dados
+                    $enderecoV = $vendedor->endereco;
+                    $enderecoV->cep = $cepData['cep'];
+                    $enderecoV->logradouro = $cepData['logradouro'];
+                    $enderecoV->bairro = $cepData['bairro'];
+                    $enderecoV->localidade = $cepData['localidade'];
+                    $enderecoV->uf = $cepData['uf'];
+                    $enderecoV->numero = $dadosValidados['numero'];
+                    $enderecoV->save();//Salvando endereço
+    
+                    DB::commit();//Fazendo commit da operação
+    
+                    //Mensagens de sucesso em caso de alteração ou não do email
+                    if ($teste_email) {
+                        event(new Registered($u));
+
+                        return response()->json([
+                            'mensagem' => 'Dados alterados com sucesso. Certifique-se de verificar seu novo email antes de realizar login!'
+                        ], 200);
+                    } else {
+                        return response()->json([
+                            'mensagem' => 'Dados alterados com sucesso.'
+                    ], 200);
+                    }
+
+                } catch (Exception $e) {//Captura exceção e envia mensagem de erro
+    
+                    DB::rollback();//Desfaz todas as operações realizadas no banco
+    
+                    return response()->json([
+                        'mensagem' => 'Erro ao alterar dados.',
+                        'erro' => $e->getMessage()
+                    ], 400);
+                }
+            } 
+            
+            //Entregador caso o id_categoria seja 4
+            else if ($id_categoria == 4) {
+    
+                //Validação dos dados específicos de entregador
+                $validator = Validator::make($r->all(), [
+                    'telefone' => [
+                        'required',
+                        'string',
+                        'size:15',
+                        'regex:/^\(\d{2}\) \d{5}-\d{4}$/',
+                        new TelWhaValidacao
+                    ],
+                
+                    'id_tipo_veiculo' => 'required|integer|in:1,2,3',
+                
+                    'placa' => [
+                        'required', 
+                        'regex:/^[A-Z0-9]{3}-[A-Z0-9]{4}$/'
+                    ],
+                ], [//Mensagens de erro personalizadas
+                    'telefone.regex' => 'O telefone deve seguir o formato (XX) XXXXX-XXXX.',
+                    'placa.regex' => 'A placa deve seguir o formato XXX-XXXX (letras maiúsculas ou números).',
+                    'id_tipo_veiculo.required' => 'O tipo de veículo deve ser informado.',
+                    'id_tipo_veiculo.in' => 'O tipo de veículo é inválido.'
+                ]);
+                
+                //Caso haja falhas no validator, envia json de erro
+                if ($validator->fails()) {
+                    return response()->json(['errors' => $validator->errors()], 422);
+                }
+    
+                //Recebe os dados validados
+                $dadosValidados = $validator->validated();
+    
+                //Junta os dados gerais e os específicos em um só
+                $dadosValidados = array_merge($dadosValidadosU, $dadosValidados);
+    
+                try {//Testa exceção
+    
+                    DB::beginTransaction();//Inicia a operação no banco
+    
+                    //Criação do usuário com seus campos do resquest
+                    $u->nome = $dadosValidados['nome'];
+                    
+                    //Verifica se o email foi alterado
+                    if ($dadosValidados['email'] != $u->email) {
+                        //Usa Eloquent para verificar a existência do e-mail
+                        $emailExiste = Usuario::where('email', $dadosValidados['email'])->exists();
+        
+                        //Se existir, envia mensagem de erro
+                        if ($emailExiste) {
+        
+                            return response()->json([
+                                'mensagem' => 'Email já registrado no sistema.',
+                            ], 400);
+        
+                        } else {//Caso não exista, recebe e precisa verificar
+                            $u->email = $dadosValidados['email'];
+                            $u->email_verified_at = null;
+                            $teste_email = true;
+                        }
+                    } else {//Continua com o email antigo
+                        $u->email = $dadosValidados['email'];
+                    }
+    
+                    $u->save();//Salvando usuário
+    
+                    //Entregador associado ao usuário recebe os dados
+                    $entregador = $u->entregador;
+                    $entregador->telefone = $dadosValidados['telefone'];
+                    $entregador->id_tipo_veiculo = $dadosValidados['id_tipo_veiculo'];
+                    
+                    //Verifica se a placa já existe
+                    if ($dadosValidados['placa'] != $entregador->placa) {
+                        //Usa Eloquent para verificar a existência da placa
+                        $placaExiste = Entregador::where('placa', $dadosValidados['placa'])->exists();
+        
+                        //Caso exista, envia mensagem de erro
+                        if ($placaExiste) {
+        
+                            return response()->json([
+                                'mensagem' => 'Placa já registrada no sistema.',
+                            ], 400);
+        
+                        } else {//Recebe caso não exista
+                            $entregador->placa = $dadosValidados['placa'];
+                        }
+                    }
+
+                    $entregador->save();//Salvando entregador
+    
+                    DB::commit();//Fazendo commit da operação
+    
+                    //Verifica se email foi alterado e envia mensagem de sucesso
+                    if ($teste_email) {
+                        event(new Registered($u));
+
+                        return response()->json([
+                            'mensagem' => 'Dados alterados com sucesso. Certifique-se de verificar seu novo email antes de realizar login'
+                        ], 200);
+                    } else {
+                        return response()->json([
+                            'mensagem' => 'Dados alterados com sucesso.'
+                    ], 200);
+                    }
+
+                } catch (Exception $e) {//Captura exceção e envia mensagem de erro
+    
+                    DB::rollback();//Desfaz todas as operações realizadas no banco
+    
+                    return response()->json([
+                        'mensagem' => 'Erro ao alterar dados.',
+                        'erro' => $e->getMessage()
+                    ], 400);
+    
+                }
+    
+            } else {//Envia mensagem de erro caso não se encaixe em nenhum if
+    
+                return response()->json([
+                    'mensagem' => 'Erro ao alterar dados.'
+                ], 400);
+            }
+    
+        } catch (Exception $e) {
+            return response()->json([
+                'mensagem' => 'Erro ao alterar dados.',
+                'erro' => $e->getMessage()
+            ], 400);
+        }
+        }
 }

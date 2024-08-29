@@ -46,6 +46,9 @@ Route::prefix('usuarios')->group(function () {
     Route::get('/dadosUsuario/{id}', [UsuarioController::class, 'dadosUsuario'])->middleware(['auth:sanctum']);//Pegar dados do usuário por id
     Route::get('/perfil', [UsuarioController::class, 'exibirPerfil'])->middleware(['auth:sanctum']);//Pegar dados do usuário logado
     Route::get('/fotoUsuario/{id}', [UsuarioController::class, 'fotoUsuario'])->middleware(['auth:sanctum']);//Pegar foto do usuário
+    Route::delete('/excluirFoto', [UsuarioController::class, 'excluirFoto'])->middleware(['auth:sanctum']);//Excluir foto do usuário
+    Route::post('/alterarFoto', [UsuarioController::class, 'alterarFoto'])->middleware(['auth:sanctum']);//Alterar foto do usuário
+    Route::put('/alterarUsuario', [UsuarioController::class, 'alterarUsuario'])->middleware(['auth:sanctum']);//Alterar foto do usuário
 
     //Rotas do sistema de login
     Route::post('/login', [UsuarioController::class, 'login'])->name('login');//Logar no site
@@ -90,6 +93,12 @@ Route::prefix('clientes')->middleware(['auth:sanctum', 'abilities:cliente'])->gr
     Route::post('/avaliarLoja', [AvaliacaoController::class, 'avaliarLoja']);//Cria uma nova avaliação para a loja ou altera uma já existente
     Route::delete('/excluirAvaliacao/{id_loja}', [AvaliacaoController::class, 'excluirAvaliacao']);//Exclui avaliação de loja
     Route::get('/verificarAvaliacao/{id_loja}', [AvaliacaoController::class, 'verificarAvaliacao']);//Verifica se avaliou a loja
+});
+
+//Rotas utilizadas por usuários cliente
+Route::prefix('vendedores')->middleware(['auth:sanctum', 'abilities:vendedor'])->group(function () {
+
+    
 });
 
 //Modelo de teste  
