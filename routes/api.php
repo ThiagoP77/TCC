@@ -8,6 +8,7 @@ use App\Http\Controllers\CoisasUteisController;
 use App\Http\Controllers\EnderecoClienteController;
 use App\Http\Controllers\EntregadorController;
 use App\Http\Controllers\MetodoPagamentoController;
+use App\Http\Controllers\ProdutoController;
 use App\Http\Controllers\TipoVeiculoController;
 use App\Http\Controllers\UsuarioController;
 use App\Http\Controllers\VendedorController;
@@ -98,7 +99,22 @@ Route::prefix('clientes')->middleware(['auth:sanctum', 'abilities:cliente'])->gr
 //Rotas utilizadas por usuários cliente
 Route::prefix('vendedores')->middleware(['auth:sanctum', 'abilities:vendedor'])->group(function () {
 
-    
+    //Rotas de manipulação de produto
+    Route::post('/cadastrarProduto', [ProdutoController::class, 'cadastrarProduto']);//Realizar cadastro de novo produto
+    Route::delete('/excluirProduto/{id}', [ProdutoController::class, 'excluirProduto']);//Excluir produto
+    Route::delete('/excluirFotoProduto/{id}', [ProdutoController::class, 'excluirFoto']);//Excluir foto do produto
+    Route::post('/alterarFotoProduto/{id}', [ProdutoController::class, 'alterarFoto']);//Alterar foto do produto
+    Route::put('/alterarProduto/{id}', [ProdutoController::class, 'alterarProduto']);//Alterar dados do produto
+    Route::get('/meusProdutos', [ProdutoController::class, 'listarMeusProdutos']);//Pegar produtos do vendedor cadastrado
+
+    //Rotas de manipulação de desconto
+    Route::post('/aplicarDesconto/{id}', [ProdutoController::class, 'aplicarDesconto']);//Colocar ou alterar desconto
+    Route::delete('/tirarDesconto/{id}', [ProdutoController::class, 'tirarDesconto']);//Excluir desconto
+
+    //Rotas para colocar em geral depois
+    Route::get('/cardapioLoja/{id}', [ProdutoController::class, 'listarProdutosLoja']);//Pegar produtos de uma loja por id
+    Route::get('/dadosProduto/{id}', [ProdutoController::class, 'dadosProduto']);//Pegar dados do produto por id
+    Route::get('/fotoProduto/{id}', [ProdutoController::class, 'fotoProduto']);//Pegar foto do produto por id
 });
 
 //Modelo de teste  
