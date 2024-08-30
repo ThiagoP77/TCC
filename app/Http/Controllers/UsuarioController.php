@@ -1410,6 +1410,13 @@ class UsuarioController extends Controller
                 ], 404);
             }
 
+            //Adm não pode alterar seus dados
+            if ($u->id_categoria == 1) {
+                return response()->json([
+                    'mensagem' => 'O administrador não pode alterar seus dados.',
+                ], 400);
+            }
+
             //Pega a URL da imagem do usuário
             $fotoURL = $u->foto_login;
 
@@ -1461,6 +1468,13 @@ class UsuarioController extends Controller
                 return response()->json([
                     'mensagem' => 'Usuário não encontrado.',
                 ], 404);
+            }
+
+            //Adm não pode alterar seus dados
+            if ($u->id_categoria == 1) {
+                return response()->json([
+                    'mensagem' => 'O administrador não pode alterar seus dados.',
+                ], 400);
             }
 
             //Realiza as validações fornecidas para a imagem de usuário
@@ -1525,6 +1539,13 @@ class UsuarioController extends Controller
                 return response()->json([
                     'mensagem' => 'Usuário não encontrado.',
                 ], 404);
+            }
+
+            //Adm não pode alterar seus dados
+            if ($u->id_categoria == 1) {
+                return response()->json([
+                    'mensagem' => 'O administrador não pode alterar seus dados.',
+                ], 400);
             }
 
             //Realiza as validações fornecidas para os campos gerais de usuário
