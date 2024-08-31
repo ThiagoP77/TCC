@@ -236,4 +236,150 @@ class ProdutoController extends Controller
 
         }
     }
+
+    //Função de aplicar desconto
+    public function aplicarDesconto (Request $r, $id) {
+        try {//Testa se tem exceção
+
+            //Verifica se o id informado é númerico e existe na tabela de produtos. Caso não existe, envia mensagem de erro
+            if (!is_numeric($id) || !Produto::where('id', $id)->exists()) {
+                return response()->json([
+                    'mensagem' => 'Produto não encontrado.'
+                ], 404);
+            }
+    
+            //Encontra o produto informado pelo id
+            $p = Produto::find($id);
+
+            //Encontra o vendedor logado
+            $v = $r->user()->vendedor;
+
+            //Caso não ache o produto, envia mensagem de erro
+            if (!$p) {
+                return response()->json([
+                    'mensagem' => 'Produto não encontrado.'
+                ], 404);
+            }
+
+            //Caso não ache o vendedor, envia mensagem de erro
+            if (!$v) {
+                return response()->json([
+                    'mensagem' => 'Vendedor não encontrado.'
+                ], 404);
+            }
+
+            //Verifica se a produto existe e é do vendedor
+            $produtoExistente = Produto::where('id', $id)
+                ->where('id_vendedor', $v->id)
+                ->exists();
+
+             //Caso não, envia mensagem de erro
+             if (!$produtoExistente) {
+
+                return response()->json([
+                    'mensagem' => 'O produto informado não é do seu usuário.'
+                ], 401);
+
+            }
+
+            //Realiza as validações fornecidas para o desconto
+            $validator = Validator::make($r->all(), [
+                'desconto' => [
+                    'required',
+                    'numeric',
+                    'max:100',
+                    'gt:0'
+                ]
+            ]);
+
+            //Caso haja falhas no primeiro validator, envia json de erro
+            if ($validator->fails()) {
+                return response()->json(['errors' => $validator->errors()], 422); 
+            }
+
+            //Recebe os dados validados
+            $dadosValidados = $validator->validated();
+
+            //Recebendo o desconto e preço com o desconto
+            $p->desconto = $dadosValidados['desconto'];
+            $p->preco_atual = ($p->preco - (($dadosValidados['desconto'] * $p->preco)/100));
+            $p->save();//Salvando alterações
+
+            return response()->json([//Envia mensagem de sucesso caso tudo tenha ocorrido de forma correta
+                'mensagem' => 'Desconto aplicado com sucesso.'
+            ], 200);
+
+        } catch (Exception $e) {//Captura exceção e envia mensagem de erro
+
+            return response()->json([
+                'mensagem' => 'Falha ao aplicar desconto.',
+                'erro' => $e->getMessage()
+            ], 400);
+
+        }
+    }
+
+    //Função de tirar desconto
+    public function tirarDesconto (Request $r, $id) {
+        try {//Testa se tem exceção
+
+            //Verifica se o id informado é númerico e existe na tabela de produtos. Caso não existe, envia mensagem de erro
+            if (!is_numeric($id) || !Produto::where('id', $id)->exists()) {
+                return response()->json([
+                    'mensagem' => 'Produto não encontrado.'
+                ], 404);
+            }
+    
+            //Encontra o produto informado pelo id
+            $p = Produto::find($id);
+
+            //Encontra o vendedor logado
+            $v = $r->user()->vendedor;
+
+            //Caso não ache o produto, envia mensagem de erro
+            if (!$p) {
+                return response()->json([
+                    'mensagem' => 'Produto não encontrado.'
+                ], 404);
+            }
+
+            //Caso não ache o vendedor, envia mensagem de erro
+            if (!$v) {
+                return response()->json([
+                    'mensagem' => 'Vendedor não encontrado.'
+                ], 404);
+            }
+
+            //Verifica se a produto existe e é do vendedor
+            $produtoExistente = Produto::where('id', $id)
+                ->where('id_vendedor', $v->id)
+                ->exists();
+
+             //Caso não, envia mensagem de erro
+             if (!$produtoExistente) {
+
+                return response()->json([
+                    'mensagem' => 'O produto informado não é do seu usuário.'
+                ], 401);
+
+            }
+
+            //0 o desconto e o preço volta a ser o total
+            $p->desconto = 0;
+            $p->preco_atual = $p->preco;
+            $p->save();//Salvando alterações
+
+            return response()->json([//Envia mensagem de sucesso caso tudo tenha ocorrido de forma correta
+                'mensagem' => 'Desconto tirado com sucesso.'
+            ], 200);
+
+        } catch (Exception $e) {//Captura exceção e envia mensagem de erro
+
+            return response()->json([
+                'mensagem' => 'Falha ao tirar desconto.',
+                'erro' => $e->getMessage()
+            ], 400);
+
+        }
+    }
 }
