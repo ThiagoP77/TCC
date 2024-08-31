@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 
 //Namespaces utilizados
 use App\Models\Api\Produto;
+use App\Models\Api\Vendedor;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -364,6 +365,15 @@ class ProdutoController extends Controller
 
             }
 
+            //Caso não, envia mensagem de erro
+            if (!($p->desconto > 0)) {
+
+                return response()->json([
+                    'mensagem' => 'O produto informado não está com desconto.'
+                ], 400);
+
+            }
+
             //0 o desconto e o preço volta a ser o total
             $p->desconto = 0;
             $p->preco_atual = $p->preco;
@@ -383,6 +393,7 @@ class ProdutoController extends Controller
         }
     }
 
+    //Função de excluir foto do produto
     public function excluirFoto (Request $r, $id) {
         try {//Testa se tem exceção
 
@@ -466,6 +477,7 @@ class ProdutoController extends Controller
         }
     }
 
+    //Função de alterar foto do produto
     public function alterarFoto (Request $r, $id) {
         try {//Testa se tem exceção
 
@@ -510,7 +522,7 @@ class ProdutoController extends Controller
 
             }
 
-            //Realiza as validações fornecidas para a imagem de usuário
+            //Realiza as validações fornecidas para a imagem de produto
             $validator = Validator::make($r->all(), [
                 'imagem' => 'required|image|mimes:jpeg,png,jpg,gif|max:16384'
             ]);
@@ -560,6 +572,7 @@ class ProdutoController extends Controller
         }
     }
 
+    //Função de alterar dados do produto
     public function alterarProduto (Request $r, $id) {
         try {//Testa se tem exceção
 
@@ -685,4 +698,151 @@ class ProdutoController extends Controller
 
         }
     }
+
+    //Função de listar os produtos do vendedor logado
+    public function listarMeusProdutos (Request $r) {
+        try {//Testa se tem exceção
+
+            //Obtém o usuário autenticado
+            $u = $r->user(); 
+
+            //Obtém o vendedor
+            $v = $u->vendedor;
+
+            //Caso o usuário ou cliente não sejam encontrados, envia mensagem de erro
+            if (!$u || !$v) {
+                return response()->json([
+                    'mensagem' => 'Falha ao encontrar seu usuário.',
+                ], 404);
+            }
+
+            //Encontra os produtos do vendedor logado
+            $resposta = Produto::where('id_vendedor', $v->id)
+                            ->select('id', 'nome', 'descricao', 'preco', 'preco_atual', 'desconto', 'imagem_produto', 'qtde_estoque')
+                            ->get();
+            
+            //Adiciona o campo booleano 'tem_desconto' a cada produto
+            foreach ($resposta as $produto) {
+                $produto->tem_desconto = $produto->desconto > 0;
+            }
+
+            //Fornece a resposta de sucesso com os produtos
+            return response()->json($resposta, 200);
+
+        } catch (Exception $e) {//Captura exceção e envia mensagem de erro
+
+            return response()->json([
+                'mensagem' => 'Falha ao listar seus produtos.',
+                'erro' => $e->getMessage()
+            ], 400);
+
+        }
+    }
+
+     //Função de listar os produtos do vendedor de ID informado
+     public function listarProdutosLoja ($id) {
+        try {//Testa se tem exceção
+
+            //Obtém o vendedor
+            $v = Vendedor::find($id);
+
+            //Caso o vendedor não seja encontrado, envia mensagem de erro
+            if (!$v) {
+                return response()->json([
+                    'mensagem' => 'Falha ao encontrar o vendedor.',
+                ], 404);
+            }
+
+            //Encontra os produtos do vendedor
+            $resposta = Produto::where('id_vendedor', $v->id)
+                            ->select('id', 'nome', 'descricao', 'preco', 'preco_atual', 'desconto', 'imagem_produto', 'qtde_estoque')
+                            ->get();
+            
+            //Adiciona o campo booleano 'tem_desconto' a cada produto
+            foreach ($resposta as $produto) {
+                $produto->tem_desconto = $produto->desconto > 0;
+            }
+
+            //Fornece a resposta de sucesso com os produtos
+            return response()->json($resposta, 200);
+
+        } catch (Exception $e) {//Captura exceção e envia mensagem de erro
+
+            return response()->json([
+                'mensagem' => 'Falha ao listar os produtos do vendedor.',
+                'erro' => $e->getMessage()
+            ], 400);
+
+        }
+    }
+
+    //Função de pegar dados do produto por id
+    public function dadosProduto ($id) {
+        try {//Testa se tem exceção
+
+            //Obtém o produto
+            $p = Produto::find($id);
+
+            //Caso o produto não seja encontrado, envia mensagem de erro
+            if (!$p) {
+                return response()->json([
+                    'mensagem' => 'Falha ao encontrar o produto.',
+                ], 404);
+            }
+
+            //Encontra os dados do produto informado
+            $resposta = Produto::where('id', $p->id)
+                            ->select('id', 'nome', 'descricao', 'preco', 'preco_atual', 'desconto', 'imagem_produto', 'qtde_estoque')
+                            ->get();
+            
+            //Adiciona o campo booleano 'tem_desconto' ao produto
+            foreach ($resposta as $produto) {
+                $produto->tem_desconto = $produto->desconto > 0;
+            }
+
+            //Fornece a resposta de sucesso com os dados do produto
+            return response()->json($resposta, 200);
+
+        } catch (Exception $e) {//Captura exceção e envia mensagem de erro
+
+            return response()->json([
+                'mensagem' => 'Falha ao mostrar dados do produto.',
+                'erro' => $e->getMessage()
+            ], 400);
+
+        }
+    }
+
+    //Função de pegar a imagem do produto informado
+    public function fotoProduto ($id) {
+        try {//Testa se tem exceção
+
+            //Obtém o produto
+            $p = Produto::find($id);
+
+            //Caso o produto não seja encontrado, envia mensagem de erro
+            if (!$p) {
+                return response()->json([
+                    'mensagem' => 'Falha ao encontrar o produto.',
+                ], 404);
+            }
+
+            //Encontra o produto e pega a imagem
+            $resposta = Produto::where('id', $p->id)
+                            ->select('imagem_produto')
+                            ->get();
+
+            //Fornece a resposta de sucesso com a imagem
+            return response()->json($resposta, 200);
+
+        } catch (Exception $e) {//Captura exceção e envia mensagem de erro
+
+            return response()->json([
+                'mensagem' => 'Falha ao mostrar a foto do produto.',
+                'erro' => $e->getMessage()
+            ], 400);
+
+        }
+    }
 }
+

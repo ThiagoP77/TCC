@@ -39,6 +39,11 @@ Route::get('/avaliacoesLoja/{id_loja}', [AvaliacaoController::class, 'mediaAvali
 //Rota de listar os vendedores do site
 Route::get('/listarVendedores', [VendedorController::class, 'listarVendedores'])->middleware(['auth:sanctum']);
 
+//Rotas gerais de produto
+Route::get('/cardapioLoja/{id_loja}', [ProdutoController::class, 'listarProdutosLoja'])->middleware(['auth:sanctum']);//Pegar produtos de uma loja por id
+Route::get('/dadosProduto/{id_produto}', [ProdutoController::class, 'dadosProduto'])->middleware(['auth:sanctum']);//Pegar dados do produto por id
+Route::get('/fotoProduto/{id_produto}', [ProdutoController::class, 'fotoProduto'])->middleware(['auth:sanctum']);//Pegar foto do produto por id
+
 //Rotas com funções básicas de usuário
 Route::prefix('usuarios')->group(function () {
 
@@ -110,11 +115,6 @@ Route::prefix('vendedores')->middleware(['auth:sanctum', 'abilities:vendedor'])-
     //Rotas de manipulação de desconto
     Route::post('/aplicarDesconto/{id}', [ProdutoController::class, 'aplicarDesconto']);//Colocar ou alterar desconto
     Route::delete('/tirarDesconto/{id}', [ProdutoController::class, 'tirarDesconto']);//Excluir desconto
-
-    //Rotas para colocar em geral depois
-    Route::get('/cardapioLoja/{id}', [ProdutoController::class, 'listarProdutosLoja']);//Pegar produtos de uma loja por id
-    Route::get('/dadosProduto/{id}', [ProdutoController::class, 'dadosProduto']);//Pegar dados do produto por id
-    Route::get('/fotoProduto/{id}', [ProdutoController::class, 'fotoProduto']);//Pegar foto do produto por id
 });
 
 //Modelo de teste  

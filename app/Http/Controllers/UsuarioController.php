@@ -17,6 +17,7 @@ use App\Rules\CnpjValidacao;
 use App\Rules\CpfValidacao;
 use App\Rules\EmailValidacao;
 use App\Rules\TelWhaValidacao;
+use App\Services\ApagaImagensProdutosService;
 use App\Services\ConsultaCEPService;
 use App\Services\ExcluirTokensExpiradosService;
 use App\Services\ValidarCodigoService;
@@ -1331,8 +1332,24 @@ class UsuarioController extends Controller
             //URL da imagem default do site
             $defaultURL = 'storage/imagens_usuarios/imagem_default_usuario.jpg';
 
+            //Variável de teste
+            $t = true;
+
             //Caso consiga deletar o usuário, irá entrar no if 
-            if ($u->delete()) {
+            if ($u) {
+
+                //Chama o serviço de apagar as imagens dos produtos
+                if (($idCategoria == 3)) {
+                    $apagar = new ApagaImagensProdutosService();
+                    $t = $apagar->excluirImagens($u->vendedor->id);
+                }
+
+                //Envia mensagem de erro caso dê erro
+                if (!$t){
+                    return response()->json([
+                        'mensagem' => 'Houve um erro ao excluir as imagens dos produtos.'
+                    ], 400);
+                }
 
                 //Verificar se a foto existe e é a default e, se não for, exclui ela do site
                 if ($fotoURL && $fotoURL !== $defaultURL) {
