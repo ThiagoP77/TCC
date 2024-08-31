@@ -1479,7 +1479,7 @@ class UsuarioController extends Controller
 
             //Realiza as validações fornecidas para a imagem de usuário
             $validator = Validator::make($r->all(), [
-                'imagem' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:16384'
+                'imagem' => 'required|image|mimes:jpeg,png,jpg,gif|max:16384'
             ]);
 
             //Caso tenha erro na validação, envia mensagem de erro

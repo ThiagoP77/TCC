@@ -382,4 +382,307 @@ class ProdutoController extends Controller
 
         }
     }
+
+    public function excluirFoto (Request $r, $id) {
+        try {//Testa se tem exceção
+
+            //Verifica se o id informado é númerico e existe na tabela de produtos. Caso não existe, envia mensagem de erro
+            if (!is_numeric($id) || !Produto::where('id', $id)->exists()) {
+                return response()->json([
+                    'mensagem' => 'Produto não encontrado.'
+                ], 404);
+            }
+    
+            //Encontra o produto informado pelo id
+            $p = Produto::find($id);
+
+            //Encontra o vendedor logado
+            $v = $r->user()->vendedor;
+
+            //Caso não ache o produto, envia mensagem de erro
+            if (!$p) {
+                return response()->json([
+                    'mensagem' => 'Produto não encontrado.'
+                ], 404);
+            }
+
+            //Caso não ache o vendedor, envia mensagem de erro
+            if (!$v) {
+                return response()->json([
+                    'mensagem' => 'Vendedor não encontrado.'
+                ], 404);
+            }
+
+            //Verifica se a produto existe e é do vendedor
+            $produtoExistente = Produto::where('id', $id)
+                ->where('id_vendedor', $v->id)
+                ->exists();
+
+             //Caso não, envia mensagem de erro
+             if (!$produtoExistente) {
+
+                return response()->json([
+                    'mensagem' => 'O produto informado não é do seu usuário.'
+                ], 401);
+
+            }
+
+            //Pega a URL da imagem do usuário
+            $fotoURL = $p->imagem_produto;
+
+            //URL da imagem default do site
+            $defaultURL = 'storage/imagens_produtos/imagem_default_produto.png';
+
+            //Verificar se a foto existe e é a default e, se não for, exclui ela do site
+            if ($fotoURL && $fotoURL !== $defaultURL) {
+
+                $path = str_replace('storage/', '', $fotoURL);
+
+                if (Storage::disk('public')->exists($path)) {
+                    Storage::disk('public')->delete($path);//Excluindo ela
+                }
+
+            } else {
+                return response()->json([//Envia mensagem de erro caso a imagem seja a default
+                    'mensagem' => 'Nenhuma imagem para ser excluída.'
+                ], 400);
+            }
+
+            //Define a imagem do usuário como a default e salva
+            $p->imagem_produto = 'storage/imagens_produtos/imagem_default_produto.png';
+            $p->save();
+
+            return response()->json([//Envia mensagem de sucesso caso tudo tenha ocorrido de forma correta
+                'mensagem' => 'Imagem de produto excluída com sucesso.'
+            ], 200);
+
+        } catch (Exception $e){//Captura exceção e envia mensagem de erro
+
+            return response()->json([
+                'mensagem' => 'Não foi possível excluir a imagem.',
+                'erro' => $e->getMessage()
+            ], 400);
+
+        }
+    }
+
+    public function alterarFoto (Request $r, $id) {
+        try {//Testa se tem exceção
+
+           //Verifica se o id informado é númerico e existe na tabela de produtos. Caso não existe, envia mensagem de erro
+           if (!is_numeric($id) || !Produto::where('id', $id)->exists()) {
+            return response()->json([
+                'mensagem' => 'Produto não encontrado.'
+            ], 404);
+            }
+
+            //Encontra o produto informado pelo id
+            $p = Produto::find($id);
+
+            //Encontra o vendedor logado
+            $v = $r->user()->vendedor;
+
+            //Caso não ache o produto, envia mensagem de erro
+            if (!$p) {
+                return response()->json([
+                    'mensagem' => 'Produto não encontrado.'
+                ], 404);
+            }
+
+            //Caso não ache o vendedor, envia mensagem de erro
+            if (!$v) {
+                return response()->json([
+                    'mensagem' => 'Vendedor não encontrado.'
+                ], 404);
+            }
+
+            //Verifica se a produto existe e é do vendedor
+            $produtoExistente = Produto::where('id', $id)
+                ->where('id_vendedor', $v->id)
+                ->exists();
+
+            //Caso não, envia mensagem de erro
+            if (!$produtoExistente) {
+
+                return response()->json([
+                    'mensagem' => 'O produto informado não é do seu usuário.'
+                ], 401);
+
+            }
+
+            //Realiza as validações fornecidas para a imagem de usuário
+            $validator = Validator::make($r->all(), [
+                'imagem' => 'required|image|mimes:jpeg,png,jpg,gif|max:16384'
+            ]);
+
+            //Caso tenha erro na validação, envia mensagem de erro
+            if ($validator->fails()) {
+                return response()->json(['errors' => $validator->errors()], 422); 
+            }
+
+            //Captura a URL da imagem do usuário
+            $fotoURL = $p->imagem_produto;
+
+            //URL da imagem default do site
+            $defaultURL = 'storage/imagens_produtos/imagem_default_produto.png';
+
+            //Verificar se a foto existe e é a default e, se não for, exclui ela do site
+            if ($fotoURL && $fotoURL !== $defaultURL) {
+
+                $path = str_replace('storage/', '', $fotoURL);
+
+                if (Storage::disk('public')->exists($path)) {
+                    Storage::disk('public')->delete($path);//Excluindo ela
+                }
+
+            } 
+
+            //Verifica se a imagem foi adicionada ou é a default e, caso não seja, adiciona ela no diretório público
+            if ($r->hasFile('imagem') && $r->file('imagem')->isValid()) {
+                $path2 = $r->file('imagem')->store('imagens_produtos', 'public');//Salva a imagem no diretório
+                $p->imagem_produto = 'storage/'.$path2;
+            } 
+
+            $p->save();//Salvando o usuário
+
+            return response()->json([//Envia mensagem de sucesso caso tudo tenha ocorrido de forma correta
+                'mensagem' => 'Imagem de produto alterada com sucesso.'
+            ], 200);
+            
+
+        } catch (Exception $e){//Captura exceção e envia mensagem de erro
+
+            return response()->json([
+                'mensagem' => 'Não foi possível alterar a imagem.',
+                'erro' => $e->getMessage()
+            ], 400);
+
+        }
+    }
+
+    public function alterarProduto (Request $r, $id) {
+        try {//Testa se tem exceção
+
+            //Verifica se o id informado é númerico e existe na tabela de produtos. Caso não existe, envia mensagem de erro
+            if (!is_numeric($id) || !Produto::where('id', $id)->exists()) {
+                return response()->json([
+                    'mensagem' => 'Produto não encontrado.'
+                ], 404);
+            }
+    
+            //Encontra o produto informado pelo id
+            $p = Produto::find($id);
+
+            //Encontra o vendedor logado
+            $v = $r->user()->vendedor;
+
+            //Caso não ache o produto, envia mensagem de erro
+            if (!$p) {
+                return response()->json([
+                    'mensagem' => 'Produto não encontrado.'
+                ], 404);
+            }
+
+            //Caso não ache o vendedor, envia mensagem de erro
+            if (!$v) {
+                return response()->json([
+                    'mensagem' => 'Vendedor não encontrado.'
+                ], 404);
+            }
+
+            //Verifica se a produto existe e é do vendedor
+            $produtoExistente = Produto::where('id', $id)
+                ->where('id_vendedor', $v->id)
+                ->exists();
+
+             //Caso não, envia mensagem de erro
+             if (!$produtoExistente) {
+
+                return response()->json([
+                    'mensagem' => 'O produto informado não é do seu usuário.'
+                ], 401);
+
+            }
+
+            //Realiza as validações fornecidas para os campos de produto
+            $validator = Validator::make($r->all(), [
+                'nome' => [
+                    'required',
+                    'string',
+                    'min:3',
+                    'max:50',
+                    'regex:/^(?=.*\p{L})(?!.*  )[ \p{L}]+$/u'
+                ],
+        
+                'descricao' => [
+                    'nullable', 
+                    'string', 
+                    'max:200'
+                ],
+        
+                'preco' => [
+                    'required',
+                    'numeric',
+                    'min:0',
+                    'max:99999999.99'
+                ],
+        
+                'qtd_estoque' => [
+                    'required',
+                    'integer',
+                    'min:0'
+                ],
+        
+            ], [//Mensagens de erro personalizadas
+                'nome.regex' => 'Nome não pode conter caracteres especiais.',
+                'descricao.string' => 'O campo descrição deve ser uma string.',
+                'descricao.max' => 'A descrição não pode passar de 200 caracteres.',
+                'preco.required' => 'O campo preço é obrigatório.',
+                'preco.numeric' => 'O campo preço deve ser numérico.',
+                'preco.min' => 'O preço não pode ser negativo.',
+                'preco.max' => 'O preço está acima do permitido no site.',
+                'qtd_estoque.required' => 'O campo quantidade em estoque é obrigatório.',
+                'qtd_estoque.integer' => 'O campo quantidade em estoque deve ser um número inteiro.',
+                'qtd_estoque.min' => 'A quantidade em estoque não pode ser negativa.'
+            ]);
+
+            //Caso haja falhas no primeiro validator, envia json de erro
+            if ($validator->fails()) {
+                return response()->json(['errors' => $validator->errors()], 422); 
+            }
+
+            //Recebe os dados validados
+            $dadosValidados = $validator->validated();
+
+            //Recebendo os dados
+            $p->nome = $dadosValidados['nome'];
+            $p->descricao = $dadosValidados['descricao'];
+            $p->preco = $dadosValidados['preco'];
+            $p->qtde_estoque = $dadosValidados['qtd_estoque'];
+
+            //Recebe o desconto
+            $d = $p->desconto;
+
+            //Verifica se o preço apresenta desconto ou não
+            if ($d != 0) {
+                $p->preco_atual = ($p->preco - (($d * $p->preco)/100));
+            } else {
+                $p->preco_atual = $p->preco;
+            }
+            
+            $p->save();//Salvando alterações
+
+            return response()->json([//Envia mensagem de sucesso caso tudo tenha ocorrido de forma correta
+                'mensagem' => 'Produto alterado com sucesso.'
+            ], 200);
+
+        } catch (Exception $e) {//Captura exceção e envia mensagem de erro
+
+            return response()->json([
+                'mensagem' => 'Falha ao alterar produto.',
+                'erro' => $e->getMessage()
+            ], 400);
+
+        }
+    }
 }
