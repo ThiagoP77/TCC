@@ -1347,7 +1347,7 @@ class UsuarioController extends Controller
                 //Envia mensagem de erro caso dê erro
                 if (!$t){
                     return response()->json([
-                        'mensagem' => 'Houve um erro ao excluir as imagens dos produtos.'
+                        'mensagem' => 'Houve um erro ao excluir as imagens dos produtos do vendedor.'
                     ], 400);
                 }
 
