@@ -2015,4 +2015,61 @@ class UsuarioController extends Controller
             ], 400);
         }
         }
+    
+    //Rota de confirmar algo por senha
+    public function confirmarPorSenha (Request $r) {
+        try {//Testa exceção
+
+            //Realiza a validação dos dados recebidos no request
+            $validator = Validator::make($r->all(), [
+                'senha' => [
+                    'required',
+                    'string',
+                    'min:8',
+                    'regex:/^\S*$/'
+                ],
+            ], [
+                'senha.regex' => 'A senha não pode conter espaços.'
+            ]);
+    
+            //Se a validação der alguma falha, envia mensagem de erro
+            if ($validator->fails()) {
+                return response()->json([
+                    'errors' => $validator->errors()
+                ], 422);
+            }
+
+            //Recebe o usuário logado
+            $u = $r->user();
+
+            //Caso não encontre o usuário
+            if (!$u) {
+                return response()->json([
+                    'mensagem' => 'Usuário não encontrado.',
+                ], 404);
+            }
+    
+             //Verifica se a senha fornecida é a mesma que a do usuário
+            if (Hash::check($r->input('senha'), $u->senha)) {
+
+                //Envia mensagem de sucesso 
+                return response()->json([
+                    'status' => true,
+                    'mensagem' => 'Operação confirmada.'
+                ], 200);
+
+            } else {//Envia mensagem de erro
+                return response()->json([
+                    'status' => false,
+                    'mensagem' => 'Senha incorreta.'
+                ], 400);
+            }
+
+        } catch (Exception $e) {//Captura exceção e envia mensagem de erro
+            return response()->json([
+                'mensagem' => 'Erro ao confirmar senha.',
+                'erro' => $e->getMessage()
+            ], 400);
+        }
+    }
 }

@@ -51,6 +51,7 @@ Route::prefix('usuarios')->group(function () {
     Route::delete('/excluirFoto', [UsuarioController::class, 'excluirFoto'])->middleware(['auth:sanctum']);//Excluir foto do usuário
     Route::post('/alterarFoto', [UsuarioController::class, 'alterarFoto'])->middleware(['auth:sanctum']);//Alterar foto do usuário
     Route::put('/alterarUsuario', [UsuarioController::class, 'alterarUsuario'])->middleware(['auth:sanctum']);//Alterar foto do usuário
+    Route::post('/confirmarPorSenha', [UsuarioController::class, 'confirmarPorSenha'])->middleware(['auth:sanctum']);//Alterar foto do usuário
 
     //Rotas do sistema de login
     Route::post('/login', [UsuarioController::class, 'login'])->name('login');//Logar no site
