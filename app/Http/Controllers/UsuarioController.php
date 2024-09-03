@@ -646,7 +646,7 @@ class UsuarioController extends Controller
             }
 
             //Caso usuário tenha sido desativado
-            if ($u->status = 'desativado') {
+            if ($u->status == 'desativado') {
                 return response()->json([
                     'mensagem' => 'Login não permitido. Seu usuário foi desativado por um de nossos admins. Para mais detalhes, entre em contato por esse número: +55 27 99533-4529!',
                 ], 401);
@@ -827,7 +827,7 @@ class UsuarioController extends Controller
             }
 
             //Caso usuário tenha sido desativado
-            if ($u->status = 'desativado') {
+            if ($u->status == 'desativado') {
                 return response()->json([
                     'mensagem' => 'Seu usuário foi desativado por um de nossos admins. Para mais detalhes, entre em contato por esse número: +55 27 99533-4529!',
                 ], 401);
@@ -1348,6 +1348,9 @@ class UsuarioController extends Controller
 
                 $u->status = 'desativado';
                 $u->save();
+
+                //Remove todos os tokens associados ao usuário
+                $u->tokens()->delete();
 
                 return response()->json([
                     'mensagem' => 'Usuário desativado com sucesso.'
