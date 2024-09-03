@@ -50,6 +50,7 @@ return new class extends Migration
             $table->string('foto_login')->nullable()->default('storage/imagens_usuarios/imagem_default_usuario.jpg');//String com a url de foto de perfil (tem uma default caso não seja adicionada)
             $table->unsignedBigInteger('id_categoria');//Chave estrangeira de "categorias_usuarios"
             $table->boolean('aceito_admin')->default(false);//Boolean de caso o usuário esteja aceito (true) ou não (false) no site
+            $table->string('status')->default('ativo');//Armazena o status de atividade
             $table->rememberToken();//String com o Token de acesso gerado ao fazer login
             $table->timestamps();//Data de criação e alteração do registro
 
@@ -135,6 +136,7 @@ return new class extends Migration
             $table->decimal('desconto', 5, 2)->default(0.00);//Decimal com o valor do desconto
             $table->string('imagem_produto')->nullable()->default('storage/imagens_produtos/imagem_default_produto.png');//String com a url de foto de perfil (tem uma default caso não seja adicionada)
             $table->unsignedInteger('qtde_estoque')->default(0)->check('qtd_estoque >= 0');//Integer com a quantidade em estoque do produto
+            $table->string('status')->default('ativo');//Armazena o status de atividade
             $table->timestamps();//Data de criação e alteração do registro
 
             $table->foreign('id_vendedor')->references('id')->on('vendedores')->onDelete('cascade');//Cria o relacionamento entre as tabelas (caso tenha registro, a exclusão é cascade)

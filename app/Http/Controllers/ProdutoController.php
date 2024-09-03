@@ -152,7 +152,7 @@ class ProdutoController extends Controller
     }
 
     //Função de excluir produto
-    public function excluirProduto (Request $r, $id) {
+    public function mudarStatus (Request $r, $id) {
         try {//Testa exceção
 
             //Verifica se o id informado é númerico e existe na tabela de produtos. Caso não existe, envia mensagem de erro
@@ -194,36 +194,33 @@ class ProdutoController extends Controller
                 ], 401);
             }
 
-            //Recebe a URL da imagem do produto
-            $fotoURL = $p->imagem_produto;
+            //Recebe o status do produto
+            $status = $p->status;
 
-            //URL da imagem default do site
-            $defaultURL = 'storage/imagens_produtos/imagem_default_produto.png';
+            //Verifica qual o status atual do produto para alterá-lo e envia mensagem de sucesso
+            if($status == 'ativo') {
 
-            //Caso consiga deletar o produto, irá entrar no if 
-            if ($p->delete()) {
+                $p->status = 'desativado';
+                $p->save();
 
-                //Verificar se a foto existe e é a default e, se não for, exclui ela do site
-                if ($fotoURL && $fotoURL !== $defaultURL) {
-
-                    $path = str_replace('storage/', '', $fotoURL);
-
-                    if (Storage::disk('public')->exists($path)) {
-                        Storage::disk('public')->delete($path);//Excluindo ela
-                    }
-
-                }
-    
-                $p->delete();//Deletando o produto
-
-                return response()->json([//Envia mensagem de sucesso caso tudo tenha ocorrido de forma correta
-                    'mensagem' => 'Produto excluído com sucesso.'
+                return response()->json([
+                    'mensagem' => 'Produto desativado com sucesso.'
                 ], 200);
+
+            } else if ($status == 'desativado') {
+
+                $p->status = 'ativo';
+                $p->save();
+
+                return response()->json([
+                    'mensagem' => 'Produto ativado com sucesso.'
+                ], 200);
+                
 
             } else {//Mensagem de erro caso não se encaixe em nenhum if
 
                 return response()->json([
-                    'mensagem' => 'Produto não encontrado.'
+                    'mensagem' => 'Produto não encontrado ou status inválido.'
                 ], 404);
 
             }
@@ -231,7 +228,7 @@ class ProdutoController extends Controller
         } catch (Exception $e) {//Captura exceção e envia mensagem de erro
 
             return response()->json([
-                'mensagem' => 'Falha ao excluir produto.',
+                'mensagem' => 'Falha ao alterar status do produto.',
                 'erro' => $e->getMessage()
             ], 400);
 
@@ -718,7 +715,7 @@ class ProdutoController extends Controller
 
             //Encontra os produtos do vendedor logado
             $resposta = Produto::where('id_vendedor', $v->id)
-                            ->select('id', 'nome', 'descricao', 'preco', 'preco_atual', 'desconto', 'imagem_produto', 'qtde_estoque')
+                            ->select('id', 'nome', 'descricao', 'preco', 'preco_atual', 'desconto', 'imagem_produto', 'qtde_estoque', 'status')
                             ->get();
             
             //Adiciona o campo booleano 'tem_desconto' a cada produto
@@ -755,7 +752,7 @@ class ProdutoController extends Controller
 
             //Encontra os produtos do vendedor
             $resposta = Produto::where('id_vendedor', $v->id)
-                            ->select('id', 'nome', 'descricao', 'preco', 'preco_atual', 'desconto', 'imagem_produto', 'qtde_estoque')
+                            ->select('id', 'nome', 'descricao', 'preco', 'preco_atual', 'desconto', 'imagem_produto', 'qtde_estoque', 'status')
                             ->get();
             
             //Adiciona o campo booleano 'tem_desconto' a cada produto
@@ -775,6 +772,44 @@ class ProdutoController extends Controller
 
         }
     }
+
+        //Função de listar os produtos do vendedor de ID informado
+        public function listarProdutosLojaCliente ($id) {
+            try {//Testa se tem exceção
+    
+                //Obtém o vendedor
+                $v = Vendedor::find($id);
+    
+                //Caso o vendedor não seja encontrado, envia mensagem de erro
+                if (!$v) {
+                    return response()->json([
+                        'mensagem' => 'Falha ao encontrar o vendedor.',
+                    ], 404);
+                }
+    
+                //Encontra os produtos do vendedor
+                $resposta = Produto::where('id_vendedor', $v->id)
+                                ->where('status', 'ativo')
+                                ->select('id', 'nome', 'descricao', 'preco', 'preco_atual', 'desconto', 'imagem_produto', 'qtde_estoque')
+                                ->get();
+                
+                //Adiciona o campo booleano 'tem_desconto' a cada produto
+                foreach ($resposta as $produto) {
+                    $produto->tem_desconto = $produto->desconto > 0;
+                }
+    
+                //Fornece a resposta de sucesso com os produtos
+                return response()->json($resposta, 200);
+    
+            } catch (Exception $e) {//Captura exceção e envia mensagem de erro
+    
+                return response()->json([
+                    'mensagem' => 'Falha ao listar os produtos do vendedor.',
+                    'erro' => $e->getMessage()
+                ], 400);
+    
+            }
+        }
 
     //Função de pegar dados do produto por id
     public function dadosProduto ($id) {

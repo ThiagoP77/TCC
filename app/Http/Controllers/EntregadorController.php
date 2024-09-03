@@ -56,7 +56,7 @@ class EntregadorController extends Controller
                       ->with('tipoVeiculo:id,nome');
             }])
 
-            ->select('id', 'nome', 'email', 'cpf', 'foto_login')
+            ->select('id', 'nome', 'email', 'cpf', 'foto_login', 'status')
             ->orderBy('id')
             ->get();
 

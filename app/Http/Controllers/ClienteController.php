@@ -23,7 +23,7 @@ class ClienteController extends Controller
                 $query->select('id','id_usuario', 'telefone');
                 }])
 
-              ->select('id', 'nome', 'email', 'cpf', 'foto_login')
+              ->select('id', 'nome', 'email', 'cpf', 'foto_login', 'status')
               ->orderBy('id')
               ->get();
 

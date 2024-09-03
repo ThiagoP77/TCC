@@ -645,6 +645,13 @@ class UsuarioController extends Controller
                 ], 404);
             }
 
+            //Caso usuário tenha sido desativado
+            if ($u->status = 'desativado') {
+                return response()->json([
+                    'mensagem' => 'Login não permitido. Seu usuário foi desativado por um de nossos admins. Para mais detalhes, entre em contato por esse número: +55 27 99533-4529!',
+                ], 401);
+            }
+
             //Verifica se o usuário já verificou o email
             if($u->email_verified_at == null) {
 
@@ -817,6 +824,13 @@ class UsuarioController extends Controller
                 return response()->json([
                     'mensagem' => 'Email não registrado no sistema.',
                 ], 404);
+            }
+
+            //Caso usuário tenha sido desativado
+            if ($u->status = 'desativado') {
+                return response()->json([
+                    'mensagem' => 'Seu usuário foi desativado por um de nossos admins. Para mais detalhes, entre em contato por esse número: +55 27 99533-4529!',
+                ], 401);
             }
 
             //Verifica se o usuário é entregador ou vendedor e se ja foi aceito no sistema. Caso não seja, envia mensagem de erro 
@@ -1304,7 +1318,7 @@ class UsuarioController extends Controller
         }
 
     //Função de excluir usuário por id
-    public function excluirUsuario ($id) {
+    public function mudarStatus ($id) {
 
         try {//Testa exceção
 
@@ -1320,58 +1334,39 @@ class UsuarioController extends Controller
 
             //Recebe os dados do usuário
             $idCategoria = $u->id_categoria;
-            $fotoURL = $u->foto_login;
+            $status = $u->status;
 
             //Se o usuário não for entregador ou vendedor, retorna mensagem de erro
             if (($idCategoria == 1)) {
                 return response()->json([
-                    'mensagem' => 'O usuário é admin e não pode ser excluído.'
+                    'mensagem' => 'O usuário é admin e seu status não pode ser alterado.'
                 ], 403);
             }
 
-            //URL da imagem default do site
-            $defaultURL = 'storage/imagens_usuarios/imagem_default_usuario.jpg';
+            //Verifica qual o status atual do usuário para alterá-lo e envia mensagem de sucesso
+            if($status == 'ativo') {
 
-            //Variável de teste
-            $t = true;
+                $u->status = 'desativado';
+                $u->save();
 
-            //Caso consiga deletar o usuário, irá entrar no if 
-            if ($u) {
-
-                //Chama o serviço de apagar as imagens dos produtos
-                if (($idCategoria == 3)) {
-                    $apagar = new ApagaImagensProdutosService();
-                    $t = $apagar->excluirImagens($u->vendedor->id);
-                }
-
-                //Envia mensagem de erro caso dê erro
-                if (!$t){
-                    return response()->json([
-                        'mensagem' => 'Houve um erro ao excluir as imagens dos produtos do vendedor.'
-                    ], 400);
-                }
-
-                //Verificar se a foto existe e é a default e, se não for, exclui ela do site
-                if ($fotoURL && $fotoURL !== $defaultURL) {
-
-                    $p = str_replace('storage/', '', $fotoURL);
-
-                    if (Storage::disk('public')->exists($p)) {
-                        Storage::disk('public')->delete($p);//Excluindo ela
-                    }
-
-                }
-    
-                $u->delete();//Deletando o usuário
-
-                return response()->json([//Envia mensagem de sucesso caso tudo tenha ocorrido de forma correta
-                    'mensagem' => 'Usuário excluído com sucesso.'
+                return response()->json([
+                    'mensagem' => 'Usuário desativado com sucesso.'
                 ], 200);
+
+            } else if ($status == 'desativado') {
+
+                $u->status = 'ativo';
+                $u->save();
+
+                return response()->json([
+                    'mensagem' => 'Usuário ativado com sucesso.'
+                ], 200);
+                
 
             } else {//Mensagem de erro caso não se encaixe em nenhum if
 
                 return response()->json([
-                    'mensagem' => 'Usuário não encontrado.'
+                    'mensagem' => 'Usuário não encontrado ou status inválido.'
                 ], 404);
 
             }
@@ -1379,7 +1374,7 @@ class UsuarioController extends Controller
         } catch (Exception $e) {//Captura exceção e envia mensagem de erro
 
             return response()->json([
-                'mensagem' => 'Falha ao excluir usuário.',
+                'mensagem' => 'Falha ao alterar status do usuário.',
                 'erro' => $e->getMessage()
             ], 400);
 

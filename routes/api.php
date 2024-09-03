@@ -36,11 +36,7 @@ Route::post('/procurarCEP', [CoisasUteisController::class, 'procurarCEP']);
 //Informa a média de avaliações de uma loja e a quantidade de pessoas que avaliou
 Route::get('/avaliacoesLoja/{id_loja}', [AvaliacaoController::class, 'mediaAvaliacao'])->middleware(['auth:sanctum']);
 
-//Rota de listar os vendedores do site
-Route::get('/listarVendedores', [VendedorController::class, 'listarVendedores'])->middleware(['auth:sanctum']);
-
 //Rotas gerais de produto
-Route::get('/cardapioLoja/{id_loja}', [ProdutoController::class, 'listarProdutosLoja'])->middleware(['auth:sanctum']);//Pegar produtos de uma loja por id
 Route::get('/dadosProduto/{id_produto}', [ProdutoController::class, 'dadosProduto'])->middleware(['auth:sanctum']);//Pegar dados do produto por id
 Route::get('/fotoProduto/{id_produto}', [ProdutoController::class, 'fotoProduto'])->middleware(['auth:sanctum']);//Pegar foto do produto por id
 
@@ -78,11 +74,13 @@ Route::prefix('admins')->middleware(['auth:sanctum', 'abilities:admin'])->group(
     Route::delete('/recusarAdmin/{id}', [UsuarioController::class, 'recusarAdmin']);//Rejeita o vendedor ou entregador correspondente ao id inserido, além de excluir seus dados
 
     //Rota de exclusão de usuário
-    Route::delete('/excluirUsuario/{id}', [UsuarioController::class, 'excluirUsuario']);//Excluir usuário não admin
+    Route::delete('/mudarStatusUsuario/{id}', [UsuarioController::class, 'mudarStatus']);//Excluir usuário não admin
 
     //Rotas de listar tipo de usuário
     Route::get('/listarClientes', [ClienteController::class, 'listarClientes']);//Lista os clientes do site
     Route::get('/listarEntregadores', [EntregadorController::class, 'listarEntregadores']);//Lista os entregadores do site
+    Route::get('/listarVendedores', [VendedorController::class, 'listarVendedoresAdmin']);//Rota de listar os vendedores do site
+    Route::get('/cardapioLoja/{id_loja}', [ProdutoController::class, 'listarProdutosLoja']);//Pegar produtos de uma loja por id
 });
 
 //Rotas utilizadas por usuários cliente
@@ -99,6 +97,10 @@ Route::prefix('clientes')->middleware(['auth:sanctum', 'abilities:cliente'])->gr
     Route::post('/avaliarLoja', [AvaliacaoController::class, 'avaliarLoja']);//Cria uma nova avaliação para a loja ou altera uma já existente
     Route::delete('/excluirAvaliacao/{id_loja}', [AvaliacaoController::class, 'excluirAvaliacao']);//Exclui avaliação de loja
     Route::get('/verificarAvaliacao/{id_loja}', [AvaliacaoController::class, 'verificarAvaliacao']);//Verifica se avaliou a loja
+
+    //Rotas para listar o que é necessário para cliente
+    Route::get('/listarVendedores', [VendedorController::class, 'listarVendedoresCliente']);//Rota de listar os vendedores do site
+    Route::get('/cardapioLoja/{id_loja}', [ProdutoController::class, 'listarProdutosLojaCliente']);//Pegar produtos de uma loja por id
 });
 
 //Rotas utilizadas por usuários cliente
@@ -106,7 +108,7 @@ Route::prefix('vendedores')->middleware(['auth:sanctum', 'abilities:vendedor'])-
 
     //Rotas de manipulação de produto
     Route::post('/cadastrarProduto', [ProdutoController::class, 'cadastrarProduto']);//Realizar cadastro de novo produto
-    Route::delete('/excluirProduto/{id}', [ProdutoController::class, 'excluirProduto']);//Excluir produto
+    Route::delete('/mudarStatusProduto/{id}', [ProdutoController::class, 'mudarStatus']);//Excluir produto
     Route::delete('/excluirFotoProduto/{id}', [ProdutoController::class, 'excluirFoto']);//Excluir foto do produto
     Route::post('/alterarFotoProduto/{id}', [ProdutoController::class, 'alterarFoto']);//Alterar foto do produto
     Route::put('/alterarProduto/{id}', [ProdutoController::class, 'alterarProduto']);//Alterar dados do produto

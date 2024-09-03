@@ -23,6 +23,7 @@ class Produto extends Model
         'desconto',
         'imagem_produto',
         'qtde_estoque',
+        'status'
     ];
 
     public function vendedor()//Estabelecimento de relacionamento com tabela "vendedores"

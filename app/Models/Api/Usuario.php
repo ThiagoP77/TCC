@@ -25,6 +25,7 @@ class Usuario extends Authenticatable implements MustVerifyEmail
         'foto_login',
         'id_categoria',
         'aceito_admin',
+        'status'
     ];
 
     protected $hidden = [//Campos ocultos

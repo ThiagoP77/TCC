@@ -83,6 +83,13 @@ class VerifyEmailController extends Controller
                 ], 400);
 
             }
+
+            //Caso usuário tenha sido desativado
+            if ($u->status = 'desativado') {
+                return response()->json([
+                    'mensagem' => 'Seu usuário foi desativado por um de nossos admins. Para mais detalhes, entre em contato por esse número: +55 27 99533-4529!',
+                ], 401);
+            }
             
             //Reenvia o email de verificação
             $u->sendEmailVerificationNotification();
