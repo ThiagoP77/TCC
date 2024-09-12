@@ -134,3 +134,5 @@ Route::get('/orders', function () {
         }
 })->middleware(['auth:sanctum', 'abilities:cliente']);
 */
+
+Route::post('/orders', [ClienteController::class, 'listarClientesT']);//Lista os clientes do site
