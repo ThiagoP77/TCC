@@ -72,4 +72,46 @@ class EntregadorController extends Controller
         }
     }
 
+    //Função de listar entregadores
+    public function listarEntregadoresPesquisa (Request $r) {
+        try {//Testa erro
+
+            $q = null;//Define a query como null
+
+            if ($r->has('query')) {//Se tiver chave definida, a query recebe seu valor
+                $requestData = $r->all();
+
+                $q =  $requestData['query'];
+            }
+
+            //Código que lista os entregadores
+            $e = Usuario::where('id_categoria', 4)
+            ->where('aceito_admin', 1)
+
+            ->where(function($query) use ($q) { // Início do agrupamento
+                $query->where('nome', 'like', "%$q%") // Filtro por nome
+                    ->orWhere('email', 'like', "%$q%"); // Filtro por email
+            })
+
+            ->with(['entregador' => function($query) {
+                $query->select('id', 'id_usuario', 'telefone', 'placa', 'id_tipo_veiculo')
+                      ->with('tipoVeiculo:id,nome');
+            }])
+
+            ->select('id', 'nome', 'email', 'cpf', 'foto_login', 'status')
+            ->orderBy('id')
+            ->get();
+
+            return response()->json($e, 200);//Retorno de sucesso em json
+
+        } catch (Exception $e) {//Captura exceção e envia mensagem de erro
+
+            return response()->json([
+                'mensagem' => 'Falha ao carregar os entregadores.',
+                'erro' => $e->getMessage()
+            ], 400);
+
+        }
+    }
+
 }

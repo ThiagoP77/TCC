@@ -79,9 +79,14 @@ Route::prefix('admins')->middleware(['auth:sanctum', 'abilities:admin'])->group(
 
     //Rotas de listar tipo de usuário
     Route::get('/listarClientes', [ClienteController::class, 'listarClientes']);//Lista os clientes do site
+    Route::post('/listarClientesPesquisa', [ClienteController::class, 'listarClientesPesquisa']);//Lista os clientes do site
     Route::get('/listarEntregadores', [EntregadorController::class, 'listarEntregadores']);//Lista os entregadores do site
+    Route::post('/listarEntregadoresPesquisa', [EntregadorController::class, 'listarEntregadoresPesquisa']);//Lista os entregadores do site
     Route::get('/listarVendedores', [VendedorController::class, 'listarVendedoresAdmin']);//Rota de listar os vendedores do site
+    Route::post('/listarVendedoresPesquisa', [VendedorController::class, 'listarVendedoresAdminPesquisa']);//Rota de listar os vendedores do site
+    
     Route::get('/cardapioLoja/{id_loja}', [ProdutoController::class, 'listarProdutosLoja']);//Pegar produtos de uma loja por id
+    Route::post('/cardapioLojaPesquisa/{id_loja}', [ProdutoController::class, 'listarProdutosLojaPesquisa']);//Pegar produtos de uma loja por id
 });
 
 //Rotas utilizadas por usuários cliente
@@ -101,7 +106,9 @@ Route::prefix('clientes')->middleware(['auth:sanctum', 'abilities:cliente'])->gr
 
     //Rotas para listar o que é necessário para cliente
     Route::get('/listarVendedores', [VendedorController::class, 'listarVendedoresCliente']);//Rota de listar os vendedores do site
+    Route::post('/listarVendedoresPesquisa', [VendedorController::class, 'listarVendedoresClientePesquisa']);//Rota de listar os vendedores do site
     Route::get('/cardapioLoja/{id_loja}', [ProdutoController::class, 'listarProdutosLojaCliente']);//Pegar produtos de uma loja por id
+    Route::post('/cardapioLojaPesquisa/{id_loja}', [ProdutoController::class, 'listarProdutosLojaClientePesquisa']);//Pegar produtos de uma loja por id
 });
 
 //Rotas utilizadas por usuários cliente
@@ -114,6 +121,7 @@ Route::prefix('vendedores')->middleware(['auth:sanctum', 'abilities:vendedor'])-
     Route::post('/alterarFotoProduto/{id}', [ProdutoController::class, 'alterarFoto']);//Alterar foto do produto
     Route::put('/alterarProduto/{id}', [ProdutoController::class, 'alterarProduto']);//Alterar dados do produto
     Route::get('/meusProdutos', [ProdutoController::class, 'listarMeusProdutos']);//Pegar produtos do vendedor cadastrado
+    Route::post('/meusProdutosPesquisar', [ProdutoController::class, 'listarMeusProdutosPesquisa']);//Pegar produtos do vendedor cadastrado
 
     //Rotas de manipulação de desconto
     Route::post('/aplicarDesconto/{id}', [ProdutoController::class, 'aplicarDesconto']);//Colocar ou alterar desconto
@@ -135,4 +143,3 @@ Route::get('/orders', function () {
 })->middleware(['auth:sanctum', 'abilities:cliente']);
 */
 
-Route::post('/orders', [ClienteController::class, 'listarClientesT']);//Lista os clientes do site

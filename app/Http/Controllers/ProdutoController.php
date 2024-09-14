@@ -736,7 +736,56 @@ class ProdutoController extends Controller
         }
     }
 
-     //Função de listar os produtos do vendedor de ID informado
+    //Função de listar os produtos do vendedor logado
+    public function listarMeusProdutosPesquisa (Request $r) {
+        try {//Testa se tem exceção
+
+            $q = null;//Define a query como null
+
+            if ($r->has('query')) {//Se tiver chave definida, a query recebe seu valor
+                $requestData = $r->all();
+
+                $q =  $requestData['query'];
+            }
+
+            //Obtém o usuário autenticado
+            $u = $r->user(); 
+
+            //Obtém o vendedor
+            $v = $u->vendedor;
+
+            //Caso o usuário ou cliente não sejam encontrados, envia mensagem de erro
+            if (!$u || !$v) {
+                return response()->json([
+                    'mensagem' => 'Falha ao encontrar seu usuário.',
+                ], 404);
+            }
+
+            //Encontra os produtos do vendedor logado
+            $resposta = Produto::where('id_vendedor', $v->id)
+                            ->where('nome', 'like', "%$q%")
+                            ->select('id', 'nome', 'descricao', 'preco', 'preco_atual', 'desconto', 'imagem_produto', 'qtde_estoque', 'status')
+                            ->get();
+            
+            //Adiciona o campo booleano 'tem_desconto' a cada produto
+            foreach ($resposta as $produto) {
+                $produto->tem_desconto = $produto->desconto > 0;
+            }
+
+            //Fornece a resposta de sucesso com os produtos
+            return response()->json($resposta, 200);
+
+        } catch (Exception $e) {//Captura exceção e envia mensagem de erro
+
+            return response()->json([
+                'mensagem' => 'Falha ao listar seus produtos.',
+                'erro' => $e->getMessage()
+            ], 400);
+
+        }
+    }
+
+    //Função de listar os produtos do vendedor de ID informado
      public function listarProdutosLoja ($id) {
         try {//Testa se tem exceção
 
@@ -752,6 +801,52 @@ class ProdutoController extends Controller
 
             //Encontra os produtos do vendedor
             $resposta = Produto::where('id_vendedor', $v->id)
+                            ->select('id', 'nome', 'descricao', 'preco', 'preco_atual', 'desconto', 'imagem_produto', 'qtde_estoque', 'status')
+                            ->get();
+            
+            //Adiciona o campo booleano 'tem_desconto' a cada produto
+            foreach ($resposta as $produto) {
+                $produto->tem_desconto = $produto->desconto > 0;
+            }
+
+            //Fornece a resposta de sucesso com os produtos
+            return response()->json($resposta, 200);
+
+        } catch (Exception $e) {//Captura exceção e envia mensagem de erro
+
+            return response()->json([
+                'mensagem' => 'Falha ao listar os produtos do vendedor.',
+                'erro' => $e->getMessage()
+            ], 400);
+
+        }
+    }
+
+    //Função de listar os produtos do vendedor de ID informado
+    public function listarProdutosLojaPesquisa ($id, Request $r) {
+        try {//Testa se tem exceção
+
+            $q = null;//Define a query como null
+
+            if ($r->has('query')) {//Se tiver chave definida, a query recebe seu valor
+                $requestData = $r->all();
+
+                $q =  $requestData['query'];
+            }
+
+            //Obtém o vendedor
+            $v = Vendedor::find($id);
+
+            //Caso o vendedor não seja encontrado, envia mensagem de erro
+            if (!$v) {
+                return response()->json([
+                    'mensagem' => 'Falha ao encontrar o vendedor.',
+                ], 404);
+            }
+
+            //Encontra os produtos do vendedor
+            $resposta = Produto::where('id_vendedor', $v->id)
+                            ->where('nome', 'like', "%$q%")
                             ->select('id', 'nome', 'descricao', 'preco', 'preco_atual', 'desconto', 'imagem_produto', 'qtde_estoque', 'status')
                             ->get();
             
@@ -790,6 +885,53 @@ class ProdutoController extends Controller
                 //Encontra os produtos do vendedor
                 $resposta = Produto::where('id_vendedor', $v->id)
                                 ->where('status', 'ativo')
+                                ->select('id', 'nome', 'descricao', 'preco', 'preco_atual', 'desconto', 'imagem_produto', 'qtde_estoque')
+                                ->get();
+                
+                //Adiciona o campo booleano 'tem_desconto' a cada produto
+                foreach ($resposta as $produto) {
+                    $produto->tem_desconto = $produto->desconto > 0;
+                }
+    
+                //Fornece a resposta de sucesso com os produtos
+                return response()->json($resposta, 200);
+    
+            } catch (Exception $e) {//Captura exceção e envia mensagem de erro
+    
+                return response()->json([
+                    'mensagem' => 'Falha ao listar os produtos do vendedor.',
+                    'erro' => $e->getMessage()
+                ], 400);
+    
+            }
+        }
+    
+         //Função de listar os produtos do vendedor de ID informado
+         public function listarProdutosLojaClientePesquisa ($id, Request $r) {
+            try {//Testa se tem exceção
+    
+                $q = null;//Define a query como null
+
+                if ($r->has('query')) {//Se tiver chave definida, a query recebe seu valor
+                    $requestData = $r->all();
+
+                    $q =  $requestData['query'];
+                }
+
+                //Obtém o vendedor
+                $v = Vendedor::find($id);
+    
+                //Caso o vendedor não seja encontrado, envia mensagem de erro
+                if (!$v) {
+                    return response()->json([
+                        'mensagem' => 'Falha ao encontrar o vendedor.',
+                    ], 404);
+                }
+    
+                //Encontra os produtos do vendedor
+                $resposta = Produto::where('id_vendedor', $v->id)
+                                ->where('status', 'ativo')
+                                ->where('nome', 'like', "%$q%")
                                 ->select('id', 'nome', 'descricao', 'preco', 'preco_atual', 'desconto', 'imagem_produto', 'qtde_estoque')
                                 ->get();
                 

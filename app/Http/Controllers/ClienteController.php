@@ -40,12 +40,12 @@ class ClienteController extends Controller
     }
 
     //Função de listar clientes
-    public function listarClientesT (Request $r) {
+    public function listarClientesPesquisa (Request $r) {
         try {//Testa erro
 
-            $q = null;
+            $q = null;//Define a query como null
 
-            if ($r->has('query')) {
+            if ($r->has('query')) {//Se tiver chave definida, a query recebe seu valor
                 $requestData = $r->all();
 
                 $q =  $requestData['query'];
@@ -53,9 +53,9 @@ class ClienteController extends Controller
 
             //Código que lista os clientes
             $c = Usuario::where('id_categoria', 2)
-                ->where(function($query) use ($q) { // Início do agrupamento
-                    $query->where('nome', 'like', "%$q%") // Filtro por nome
-                        ->orWhere('email', 'like', "%$q%"); // Filtro por email
+                ->where(function($query) use ($q) {//Início do agrupamento
+                    $query->where('nome', 'like', "%$q%")//Filtro por nome
+                        ->orWhere('email', 'like', "%$q%");//Filtro por email
                 })
               ->with(['cliente' => function($query) {
                 $query->select('id','id_usuario', 'telefone');

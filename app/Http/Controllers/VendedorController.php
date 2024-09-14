@@ -98,8 +98,143 @@ class VendedorController extends Controller
         }
     }
 
+     //Função de listar vendedores para o admin
+     public function listarVendedoresAdminPesquisa (Request $r) {
+        try {//Testa erro
+
+            $q = null;//Define a query como null
+
+            if ($r->has('query')) {//Se tiver chave definida, a query recebe seu valor
+                $requestData = $r->all();
+
+                $q =  $requestData['query'];
+            }
+    
+            //Código que lista os vendedores
+            $v = Usuario::where('id_categoria', 3)
+            ->where('aceito_admin', 1)
+
+            ->where(function($query) use ($q) { // Início do agrupamento
+                $query->where('nome', 'like', "%$q%") // Filtro por nome
+                    ->orWhere('email', 'like', "%$q%"); // Filtro por email
+            })
+
+            ->with(['vendedor' => function($query) {
+                $query->select('id','id_usuario', 'telefone', 'whatsapp', 'cnpj', 'descricao')
+                      ->with('endereco:id_vendedor,cep,logradouro,bairro,localidade,uf,numero');
+            }])
+    
+            ->select('id', 'nome', 'email', 'cpf', 'foto_login','status')
+            ->orderBy('id')
+            ->get();
+
+            //Coletar os IDs dos vendedores
+            $vendedorIds = $v->pluck('vendedor.id')->unique();
+
+            //Consulta para obter a média e a quantidade de avaliações
+            $avaliacoes = DB::table('avaliacoes')
+                ->select('id_vendedor', 
+                        DB::raw('IFNULL(AVG(avaliacao), 0) as media_avaliacao'), 
+                        DB::raw('IFNULL(COUNT(*), 0) as quantidade_avaliacoes'))
+                ->whereIn('id_vendedor', $vendedorIds)
+                ->groupBy('id_vendedor')
+                ->get()
+                ->keyBy('id_vendedor');
+            
+            //Adicionar as informações de média e quantidade de avaliações aos vendedores
+            $v->each(function ($usuario) use ($avaliacoes) {
+                $vendedor = $usuario->vendedor;
+                if ($vendedor) {
+                    $avaliacao = $avaliacoes->get($vendedor->id);
+
+                    $vendedor->avaliacoes = [
+                        'media' => $avaliacao ? number_format($avaliacao->media_avaliacao, 1) : '0.0',
+                        'quantidade' => $avaliacao ? $avaliacao->quantidade_avaliacoes : 0
+                    ];
+                }
+            });
+    
+            return response()->json($v, 200);//Retorno de sucesso em json
+
+        } catch (Exception $e) {//Captura exceção e envia mensagem de erro
+    
+            return response()->json([
+                'mensagem' => 'Falha ao carregar as lojas.',
+                'erro' => $e->getMessage()
+            ], 400);
+    
+        }
+    }
+
     //Função de listar vendedores
-    public function listarVendedoresCliente () {
+    public function listarVendedoresCliente (Request $r) {
+        try {//Testa erro
+    
+            $q = null;//Define a query como null
+
+            if ($r->has('query')) {//Se tiver chave definida, a query recebe seu valor
+                $requestData = $r->all();
+
+                $q =  $requestData['query'];
+            }
+
+            //Código que lista os vendedores
+            $v = Usuario::where('id_categoria', 3)
+            ->where('aceito_admin', 1)
+            ->where('status', 'ativo')
+            ->where(function($query) use ($q) { // Início do agrupamento
+                $query->where('nome', 'like', "%$q%") // Filtro por nome
+                    ->orWhere('email', 'like', "%$q%"); // Filtro por email
+            })  
+            ->with(['vendedor' => function($query) {
+                $query->select('id','id_usuario', 'telefone', 'whatsapp', 'cnpj', 'descricao')
+                      ->with('endereco:id_vendedor,cep,logradouro,bairro,localidade,uf,numero');
+            }])
+    
+            ->select('id', 'nome', 'email', 'cpf', 'foto_login')
+            ->orderBy('id')
+            ->get();
+
+            //Coletar os IDs dos vendedores
+            $vendedorIds = $v->pluck('vendedor.id')->unique();
+
+            //Consulta para obter a média e a quantidade de avaliações
+            $avaliacoes = DB::table('avaliacoes')
+                ->select('id_vendedor', 
+                        DB::raw('IFNULL(AVG(avaliacao), 0) as media_avaliacao'), 
+                        DB::raw('IFNULL(COUNT(*), 0) as quantidade_avaliacoes'))
+                ->whereIn('id_vendedor', $vendedorIds)
+                ->groupBy('id_vendedor')
+                ->get()
+                ->keyBy('id_vendedor');
+            
+            //Adicionar as informações de média e quantidade de avaliações aos vendedores
+            $v->each(function ($usuario) use ($avaliacoes) {
+                $vendedor = $usuario->vendedor;
+                if ($vendedor) {
+                    $avaliacao = $avaliacoes->get($vendedor->id);
+
+                    $vendedor->avaliacoes = [
+                        'media' => $avaliacao ? number_format($avaliacao->media_avaliacao, 1) : '0.0',
+                        'quantidade' => $avaliacao ? $avaliacao->quantidade_avaliacoes : 0
+                    ];
+                }
+            });
+    
+            return response()->json($v, 200);//Retorno de sucesso em json
+
+        } catch (Exception $e) {//Captura exceção e envia mensagem de erro
+    
+            return response()->json([
+                'mensagem' => 'Falha ao carregar as lojas.',
+                'erro' => $e->getMessage()
+            ], 400);
+    
+        }
+    }
+
+    //Função de listar vendedores
+    public function listarVendedoresClientePesquisa () {
         try {//Testa erro
     
             //Código que lista os vendedores
