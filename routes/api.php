@@ -121,7 +121,7 @@ Route::prefix('vendedores')->middleware(['auth:sanctum', 'abilities:vendedor'])-
     Route::post('/alterarFotoProduto/{id}', [ProdutoController::class, 'alterarFoto']);//Alterar foto do produto
     Route::put('/alterarProduto/{id}', [ProdutoController::class, 'alterarProduto']);//Alterar dados do produto
     Route::get('/meusProdutos', [ProdutoController::class, 'listarMeusProdutos']);//Pegar produtos do vendedor cadastrado
-    Route::post('/meusProdutosPesquisar', [ProdutoController::class, 'listarMeusProdutosPesquisa']);//Pegar produtos do vendedor cadastrado
+    Route::post('/meusProdutosPesquisa', [ProdutoController::class, 'listarMeusProdutosPesquisa']);//Pegar produtos do vendedor cadastrado
 
     //Rotas de manipulação de desconto
     Route::post('/aplicarDesconto/{id}', [ProdutoController::class, 'aplicarDesconto']);//Colocar ou alterar desconto
