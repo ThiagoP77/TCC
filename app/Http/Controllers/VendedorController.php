@@ -167,7 +167,7 @@ class VendedorController extends Controller
     }
 
     //Função de listar vendedores
-    public function listarVendedoresCliente (Request $r) {
+    public function listarVendedoresClientePesquisa (Request $r) {
         try {//Testa erro
     
             $q = null;//Define a query como null
@@ -183,8 +183,7 @@ class VendedorController extends Controller
             ->where('aceito_admin', 1)
             ->where('status', 'ativo')
             ->where(function($query) use ($q) { // Início do agrupamento
-                $query->where('nome', 'like', "%$q%") // Filtro por nome
-                    ->orWhere('email', 'like', "%$q%"); // Filtro por email
+                $query->where('nome', 'like', "%$q%"); // Filtro por nome
             })  
             ->with(['vendedor' => function($query) {
                 $query->select('id','id_usuario', 'telefone', 'whatsapp', 'cnpj', 'descricao')
@@ -234,7 +233,7 @@ class VendedorController extends Controller
     }
 
     //Função de listar vendedores
-    public function listarVendedoresClientePesquisa () {
+    public function listarVendedoresCliente () {
         try {//Testa erro
     
             //Código que lista os vendedores
