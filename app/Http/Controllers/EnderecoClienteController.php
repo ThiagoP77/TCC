@@ -30,6 +30,22 @@ class EnderecoClienteController extends Controller
     public function adicionarEndereco (Request $r) {
         try {
 
+            //Obtém o usuário autenticado
+            $user = $r->user(); 
+
+            //Obtém o cliente
+            $cliente = $user->cliente;
+
+            // Verifica quantos endereços o cliente já tem
+            $enderecoCount = $cliente->enderecos()->count(); // Supondo que haja uma relação 'enderecos' no modelo Cliente
+
+            //Se o cliente já tiver 3 endereços, não permite a criação de outro
+            if ($enderecoCount >= 3) {
+                return response()->json([
+                    'mensagem' => 'Você já tem 3 endereços cadastrados. Não é possível adicionar mais.',
+                ], 403);//Código de status 403 - Proibido
+            }
+
             //Realiza a validação dos dados recebidos no request
             $validator = Validator::make($r->all(), [
                 'cep' => [
@@ -81,12 +97,6 @@ class EnderecoClienteController extends Controller
 
             //Recebe os dados do endereço
             $cepData = $resultado['data'];
-
-            //Obtém o usuário autenticado
-            $user = $r->user(); 
-
-            //Obtém o cliente
-            $cliente = $user->cliente;
 
             //Criação do endereço do vendedor com os dados da requisição
             $enderecoC = new EnderecoCliente();
