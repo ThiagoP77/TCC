@@ -49,6 +49,7 @@ Em outro terminal, ativar a fila do jobs
 ```
 php artisan queue:work
 ```
+## Como acessar a API
 
 Para acessar a API, é recomendado utilizar o Insomnia para simular requisições à api
 ```
