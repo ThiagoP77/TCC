@@ -12,9 +12,9 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Support\Facades\Mail;
 
 //Classe que lida com os enventos de RecusadoA
-class RecusadoAListener
+class RecusadoAListener implements ShouldQueue
 {
-    
+    use InteractsWithQueue;
     //Construtor
     public function __construct()
     {

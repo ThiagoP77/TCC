@@ -13,8 +13,9 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
 //Classe que lida com os enventos de AceitoA
-class AceitoAListener
+class AceitoAListener implements ShouldQueue
 {
+    use InteractsWithQueue;
     
     //Construtor
     public function __construct()

@@ -3,7 +3,7 @@
 * PHP 8.2 ou superior
 * Composer
 
-## Como rodar o projeto baixado
+## Preparando o ambiente para rodar o projeto baixado
 
 Duplicar o arquivo ".env.example" e nomear para ".env" <br>
 Alterar no arquivo ".env" as credenciais do banco de dados <br>
@@ -33,10 +33,21 @@ Executar as seeders
 ```
 php artisan db:seed
 ```
+## Comandos para rodar o projeto baixado
 
-Iniciar o projeto criado com Laravel
+Em um terminal, iniciar o projeto criado com Laravel
 ```
 php artisan serve
+```
+
+Em outro terminal, ativar as tarefas definidas pelos Schedules
+```
+php artisan schedule:work
+```
+
+Em outro terminal, ativar a fila do jobs
+```
+php artisan queue:work
 ```
 
 Para acessar a API, é recomendado utilizar o Insomnia para simular requisições à api

@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\DB;
 class ExcluirTokensExpiradosService {
 
     //Função de excluir os tokens expirados
-    public function excluirTokensExpirados() 
+    public function __invoke() 
     {
 
         //Obtém a data atual

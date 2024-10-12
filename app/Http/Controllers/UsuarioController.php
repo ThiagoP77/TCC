@@ -5,7 +5,13 @@ namespace App\Http\Controllers;
 
 //Namespaces utilizados
 use App\Events\AceitoAEvent;
+use App\Events\EmailValidaEvent;
 use App\Events\RecusadoAEvent;
+use App\Events\RegistroCustomizadoEvent;
+use App\Jobs\AceitoAJob;
+use App\Jobs\RecuperarSenhaJob;
+use App\Jobs\RecusadoAJob;
+use App\Jobs\RegistroCustomizadoJob;
 use App\Mail\EsqueceuSenhaMail;
 use App\Models\Api\Cliente;
 use App\Models\Api\Entregador;
@@ -192,7 +198,7 @@ class UsuarioController extends Controller
 
                 DB::commit();//Fazendo commit da operação
 
-                event(new Registered($usuario));//Enviando email de verificação
+                RegistroCustomizadoJob::dispatch($usuario);//Enviando email de verificação
 
                 return response()->json(['mensagem' => 'Cliente cadastrado com sucesso, um email de verificação foi enviado.'], 200);//Retorno da mensagem de sucesso
 
@@ -336,7 +342,7 @@ class UsuarioController extends Controller
 
                 DB::commit();//Fazendo commit da operação
 
-                event(new Registered($usuario));//Envia email de verificação
+                RegistroCustomizadoJob::dispatch($usuario);//Envia email de verificação
 
                 return response()->json(['mensagem' => 'Vendedor cadastrado com sucesso, aguarde autorização de algum admin. Um email de verificação foi enviado!'], 200);//Retorno da mensagem de sucesso
 
@@ -420,7 +426,7 @@ class UsuarioController extends Controller
 
                 DB::commit();//Fazendo commit da operação
 
-                event(new Registered($usuario));//Envia email de verificação
+                RegistroCustomizadoJob::dispatch($usuario);//Envia email de verificação
 
                 return response()->json(['mensagem' => 'Entregador cadastrado com sucesso, aguarde autorização de algum admin. Um email de verificação foi enviado!'], 200);//Retorno da mensagem de sucesso
 
@@ -492,10 +498,10 @@ class UsuarioController extends Controller
                 //Geração de evento, com função definida para entregador e para vendedor
                 if ($u->id_categoria == 3) {
                     $funcao = "vendedor";
-                    event(new AceitoAEvent($email, $nome, $funcao));
+                    AceitoAJob::dispatch($email, $nome, $funcao);
                 } elseif ($u->id_categoria == 4) {
                     $funcao = "entregador";
-                    event(new AceitoAEvent($email, $nome, $funcao));
+                    AceitoAJob::dispatch($email, $nome, $funcao);
                 }
     
                 return response()->json([//Envia mensagem de sucesso caso tudo tenha ocorrido de forma correta
@@ -575,10 +581,10 @@ class UsuarioController extends Controller
                 //Geração de evento, com função definida para entregador e para vendedor
                 if ($u->id_categoria == 3) {
                     $funcao = "vendedor";
-                    event(new RecusadoAEvent($email, $nome, $funcao));
+                    RecusadoAJob::dispatch($email, $nome, $funcao);
                 } elseif ($u->id_categoria == 4) {
                     $funcao = "entregador";
-                    event(new RecusadoAEvent($email, $nome, $funcao));
+                    RecusadoAJob::dispatch($email, $nome, $funcao);
                 }
     
                 $u->delete();//Deletando o usuário
@@ -770,9 +776,6 @@ class UsuarioController extends Controller
                 //Instância do serviço de excluir tokens expirados
                 $excluir = new ExcluirTokensExpiradosService();
 
-                //Exclui os tokens
-                $excluir->excluirTokensExpirados();
-
                 //Envia mensagem de sucesso com informações necessárias para navegação no site
                 return response()->json([
                     'message' => true,
@@ -877,7 +880,7 @@ class UsuarioController extends Controller
                     $data = $dataMaisHora->format('d/m/Y');//Deixa a data no formato especificado
 
                     //Envia email com o código de reset de senha para o email informado
-                    Mail::to($u->email)->send(new EsqueceuSenhaMail($u, $codigo, $data, $tempo));
+                    RecuperarSenhaJob::dispatch($u, $codigo, $data, $tempo);
                 }
 
                 return response()->json([//Envia mensagem de sucesso
@@ -1670,7 +1673,7 @@ class UsuarioController extends Controller
                     DB::commit();//Fazendo commit da operação
     
                     if ($teste_email) {//Sucesso e email alterado
-                        event(new Registered($u));//Enviando email de verificação
+                        RegistroCustomizadoJob::dispatch($u);
 
                         return response()->json([
                             'mensagem' => 'Dados alterados com sucesso. Certifique-se de verificar seu novo email antes de realizar login!'
@@ -1862,7 +1865,7 @@ class UsuarioController extends Controller
     
                     //Mensagens de sucesso em caso de alteração ou não do email
                     if ($teste_email) {
-                        event(new Registered($u));
+                        RegistroCustomizadoJob::dispatch($u);
 
                         return response()->json([
                             'mensagem' => 'Dados alterados com sucesso. Certifique-se de verificar seu novo email antes de realizar login!'
@@ -1979,7 +1982,7 @@ class UsuarioController extends Controller
     
                     //Verifica se email foi alterado e envia mensagem de sucesso
                     if ($teste_email) {
-                        event(new Registered($u));
+                        RegistroCustomizadoJob::dispatch($u);
 
                         return response()->json([
                             'mensagem' => 'Dados alterados com sucesso. Certifique-se de verificar seu novo email antes de realizar login'

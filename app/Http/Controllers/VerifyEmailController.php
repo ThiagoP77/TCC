@@ -4,6 +4,8 @@
 namespace App\Http\Controllers;
 
 //Namespaces utilizados
+use App\Events\RegistroCustomizadoEvent;
+use App\Jobs\RegistroCustomizadoJob;
 use App\Models\Api\Usuario;
 use App\Rules\EmailValidacao;
 use Exception;
@@ -92,7 +94,7 @@ class VerifyEmailController extends Controller
             }
             
             //Reenvia o email de verificação
-            $u->sendEmailVerificationNotification();
+            RegistroCustomizadoJob::dispatch($u);//Enviando email de verificação
  
             //Envia mensagem de sucesso
             return response()->json([
