@@ -1,7 +1,11 @@
 ## Requisitos
 
-* PHP 8.2 ou superior
-* Composer
+* PHP 8.2 ou superior <br>
+* Composer <br><br>
+* Redis-Cli 6.0.16 
+```
+Utilizar o WSL como demonstrado no tutorial: https://www.youtube.com/watch?v=5VZpzwJeMDo
+```
 
 ## Preparando o ambiente para rodar o projeto baixado
 
