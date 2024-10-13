@@ -17,24 +17,36 @@ class LimparCarrinhosService
         //Define a data limite para exclusão
         $dataLimite = Carbon::now();
 
-        //Obtém os registros expirados do carrinho
-        $carrinhosExpirados = Carrinho::where('expires_at', '<=', $dataLimite)->get();
+        //Obtém todos os registros do carrinho
+        $carrinhos = Carrinho::all();
 
-        foreach ($carrinhosExpirados as $carrinho) {
+        foreach ($carrinhos as $carrinho) {
             
             //Obtém o produto associado ao carrinho
             $produto = Produto::find($carrinho->id_produto);
             
-            if ($produto) {
+            //Exclui o carrinho se o produto estiver desativado
+            if ($produto && $produto->status == 'desativado') {
+                $produto->qtde_estoque += $carrinho->qtde;
+                $produto->save();
 
-                //Adiciona a quantidade de volta ao estoque
-                $produto->qtde_estoque += $carrinho->qtde; // Supondo que você tenha um campo `estoque`
-                $produto->save(); // Salva as alterações no produto
+                $carrinho->delete();
 
+                continue;
             }
 
-            //Exclui o registro do carrinho
-            $carrinho->delete();
+            //Verifica se o carrinho está expirado
+            if ($carrinho->expires_at <= $dataLimite) {
+
+                //Se o carrinho está expirado e o produto existe, devolve a quantidade ao estoque
+                if ($produto) {
+                    $produto->qtde_estoque += $carrinho->qtde;
+                    $produto->save();
+                }
+
+                //Exclui o registro do carrinho
+                $carrinho->delete();
+            }
         }
  
     }

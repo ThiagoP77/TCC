@@ -79,6 +79,16 @@ class CarrinhoController extends Controller
 
             //Obtém a loja
             $loja = Vendedor::find($dadosValidados['id_loja']);
+
+            //Obtém o usuário da loja
+            $userl = $loja->usuario;
+
+            //Verifica se a loja está desativada
+            if ($userl->status == 'desativado') {
+                return response()->json([
+                    'mensagem' => 'Falha no processo, a loja está desativada.',
+                ], 400);
+            }
     
             //Verifica se o usuário, o cliente e a loja existem
             if (!$user || !$cliente || !$loja) {
@@ -88,7 +98,9 @@ class CarrinhoController extends Controller
             }
 
             //Encontrando o produto
-            $produto = Produto::find($dadosValidados['id_produto']);
+            $produto = Produto::where('id', $dadosValidados['id_produto'])
+            ->lockForUpdate()
+            ->first();
 
             //Verifica a existência do produto, se ele é daquela loja e se está ativo
             if (!$produto || $produto->status == 'desativado' || !Produto::where('id', $dadosValidados['id_produto'])
@@ -136,7 +148,7 @@ class CarrinhoController extends Controller
                         //Modificações no carrinho
                         $carrinho->qtde = $quantidade + $dadosValidados['qtd'];
                         $carrinho->expires_at = Carbon::now()->addHour();
-                        $carrinho->total = ($quantidade + $dadosValidados['qtd']) * ($produto->preco_atual);
+                        //$carrinho->total = ($quantidade + $dadosValidados['qtd']) * ($produto->preco_atual);
                         $carrinho->save();
 
                         //Modificações no produto
@@ -217,7 +229,7 @@ class CarrinhoController extends Controller
                     $registro->id_produto = $produto->id;
                     $registro->qtde = $dadosValidados['qtd'];
                     $registro->expires_at = Carbon::now()->addHour();
-                    $registro->total = ($dadosValidados['qtd']) * ($produto->preco_atual);
+                    //$registro->total = ($dadosValidados['qtd']) * ($produto->preco_atual);
                     $registro->save();
 
                     //Produto sofre alterações no estoque
@@ -297,6 +309,16 @@ class CarrinhoController extends Controller
 
             //Obtém a loja
             $loja = Vendedor::find($dadosValidados['id_loja']);
+
+            //Obtém o usuário da loja
+            $userl = $loja->usuario;
+
+            //Envia mensagem de erro caso a loja esteja desativada
+            if ($userl->status == 'desativado') {
+                return response()->json([
+                    'mensagem' => 'Falha no processo, a loja está desativada.',
+                ], 400);
+            }
     
             //Verifica se o usuário e cliente existem
             if (!$user || !$cliente || !$loja) {
@@ -306,7 +328,9 @@ class CarrinhoController extends Controller
             }
 
             //Procura e faz a instância do produto
-            $produto = Produto::find($dadosValidados['id_produto']);
+            $produto = Produto::where('id', $dadosValidados['id_produto'])
+            ->lockForUpdate()
+            ->first();
 
             //Verificação do produto
             if (!$produto || $produto->status == 'desativado' || !Produto::where('id', $dadosValidados['id_produto'])
@@ -361,7 +385,7 @@ class CarrinhoController extends Controller
                             //Atualiza o carrinho com os dados
                             $carrinho->qtde = $dadosValidados['qtd'];
                             $carrinho->expires_at = Carbon::now()->addHour();
-                            $carrinho->total = ($dadosValidados['qtd']) * ($produto->preco_atual);
+                            //$carrinho->total = ($dadosValidados['qtd']) * ($produto->preco_atual);
                             $carrinho->save();
 
                             //Atualiza o estoque do produto
@@ -383,7 +407,7 @@ class CarrinhoController extends Controller
                         //Atualiza o carrinho com os dados
                         $carrinho->qtde = $dadosValidados['qtd'];
                         $carrinho->expires_at = Carbon::now()->addHour();
-                        $carrinho->total = ($dadosValidados['qtd']) * ($produto->preco_atual);
+                        //$carrinho->total = ($dadosValidados['qtd']) * ($produto->preco_atual);
                         $carrinho->save();
 
                         //Atualiza o estoque do produto

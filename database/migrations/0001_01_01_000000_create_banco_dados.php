@@ -160,7 +160,7 @@ return new class extends Migration
             $table->unsignedBigInteger('id_vendedor');//Chave estrangeira de "vendedores"
             $table->unsignedBigInteger('id_produto');//Chave estrangeira de "produtos"
             $table->unsignedInteger('qtde')->default(1)->check('qtde >= 0');//Integer com a quantidade do produto no carrinho
-            $table->decimal('total', 10, 2)->check('total >= 0');//Decimal do preco total do carrinho
+            //$table->decimal('total', 10, 2)->check('total >= 0');//Decimal do preco total do carrinho
             $table->enum('status', ['Reservado.', 'Expirado.'])->default('Reservado.');//Status possíveis para o pedido
             $table->timestamp('expires_at')->nullable();//Campo de hora que recebe quando a garantia do produto expira
             $table->timestamps();//Data de criação e alteração do registro
