@@ -155,14 +155,15 @@ return new class extends Migration
         });
 
         Schema::create('carrinhos', function (Blueprint $table) {//Tabela de carrinhos
+            $table->id();//Chave primária id
             $table->unsignedBigInteger('id_cliente');//Chave estrangeira de "clientes"
             $table->unsignedBigInteger('id_vendedor');//Chave estrangeira de "vendedores"
             $table->unsignedBigInteger('id_produto');//Chave estrangeira de "produtos"
             $table->unsignedInteger('qtde')->default(1)->check('qtde >= 0');//Integer com a quantidade do produto no carrinho
-            $table->decimal('total', 10, 2)->check('total >= 0');//Decima do preco total do carrinho
+            $table->decimal('total', 10, 2)->check('total >= 0');//Decimal do preco total do carrinho
+            $table->enum('status', ['Reservado.', 'Expirado.'])->default('Reservado.');//Status possíveis para o pedido
+            $table->timestamp('expires_at')->nullable();//Campo de hora que recebe quando a garantia do produto expira
             $table->timestamps();//Data de criação e alteração do registro
-
-            $table->primary(['id_cliente', 'id_vendedor', 'id_produto']);//Chave primária composta por todas as estrangeiras
 
             $table->foreign('id_cliente')->references('id')->on('clientes')->onDelete('cascade');//Cria o relacionamento entre as tabelas (caso tenha registro, a exclusão é cascade)
             $table->foreign('id_vendedor')->references('id')->on('vendedores')->onDelete('cascade');//Cria o relacionamento entre as tabelas (caso tenha registro, a exclusão é cascade)
@@ -182,7 +183,7 @@ return new class extends Migration
             $table->boolean('aceito_vendedor')->default(false);//Boolean para valor true ao ser aceito pelo vendedor
             $table->boolean('aceito_entregador')->default(false);//Boolean para valor true ao ser aceito pelo entregador
             $table->timestamp('data_criacao')->default(DB::raw('CURRENT_TIMESTAMP'));//Data de criação
-            $table->enum('status', ['pendente', 'aceito pelo vendedor', 'aceito para entrega', 'entregue'])->default('pendente');//Status possíveis para o pedido
+            $table->enum('status', ['Pendente.', 'Aceito pela loja.', 'Aceito para entrega.', 'Entregue.', 'Cancelado.'])->default('Pendente.');//Status possíveis para o pedido
             $table->timestamps();//Data de criação e alteração do registro
 
             $table->foreign('id_cliente')->references('id')->on('clientes')->onDelete('cascade');//Cria o relacionamento entre as tabelas (caso tenha registro, a exclusão é cascade)

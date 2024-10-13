@@ -2,6 +2,7 @@
 
 //Namespaces utilizados
 use App\Services\ExcluirTokensExpiradosService;
+use App\Services\LimparCarrinhosService;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Schedule;
@@ -14,3 +15,6 @@ Artisan::command('inspire', function () {
 
 //Comando agendado de limpar os tokens expirados todos os dias às 23:00
 Schedule::call(new ExcluirTokensExpiradosService)->daily()->at('23:00');
+
+//Comando agendado para excluir os registros expirados na tabela de carrinho
+Schedule::call(new LimparCarrinhosService)->everyTwoMinutes()->name('limpar.carrinhos')->withoutOverlapping();

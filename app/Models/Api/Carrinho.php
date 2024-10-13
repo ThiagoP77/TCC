@@ -20,6 +20,8 @@ class Carrinho extends Model
         'id_produto',
         'qtde',
         'total',
+        'expires_at',
+        'status',
     ];
 
     public function cliente()//Estabelecimento de relacionamento com tabela "clientes"

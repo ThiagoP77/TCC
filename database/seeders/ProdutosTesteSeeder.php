@@ -60,6 +60,50 @@ class ProdutosTesteSeeder extends Seeder
                 'qtde_estoque' => 1
             ]);
         }
+
+        if(Usuario::where('email', 'testeloja2@gmail.com')->exists()){//Cria o produto relacionado
+            Produto::create([
+                'id_vendedor' => 2,
+                'nome' => 'Bolsonaro Presidente',
+                'descricao' => 'Esperança do povo.',
+                'preco' => 124000,
+                'preco_atual' => 124000,
+                'qtde_estoque' => 100
+            ]);
+        }
+
+        if(Usuario::where('email', 'testeloja2@gmail.com')->exists()){//Cria o produto relacionado
+            Produto::create([
+                'id_vendedor' => 2,
+                'nome' => 'Larápio Maldito',
+                'descricao' => 'Petista safado.',
+                'preco' => 0.1,
+                'preco_atual' => 0.1,
+                'qtde_estoque' => 100000
+            ]);
+        }
+
+        if(Usuario::where('email', 'testeloja2@gmail.com')->exists()){//Cria o produto relacionado
+            Produto::create([
+                'id_vendedor' => 2,
+                'nome' => 'Capitão do Povo, Vai Vencer de Novo',
+                'descricao' => 'Ditadura petista jamais.',
+                'preco' => 222222,
+                'preco_atual' => 222222,
+                'qtde_estoque' => 222222
+            ]);
+        }
+
+        if(Usuario::where('email', 'testeloja2@gmail.com')->exists()){//Cria o produto relacionado
+            Produto::create([
+                'id_vendedor' => 2,
+                'nome' => 'BolsoLula',
+                'descricao' => 'Peça rara.',
+                'preco' => 99999999,
+                'preco_atual' => 99999999,
+                'qtde_estoque' => 1
+            ]);
+        }
         
     }
 }

@@ -2,6 +2,7 @@
 
 //Namespaces utilizados
 use App\Http\Controllers\AvaliacaoController;
+use App\Http\Controllers\CarrinhoController;
 use App\Http\Controllers\CategoriaUsuarioController;
 use App\Http\Controllers\ClienteController;
 use App\Http\Controllers\CoisasUteisController;
@@ -109,6 +110,14 @@ Route::prefix('clientes')->middleware(['auth:sanctum', 'abilities:cliente'])->gr
     Route::post('/listarVendedoresPesquisa', [VendedorController::class, 'listarVendedoresClientePesquisa']);//Rota de listar os vendedores do site
     Route::get('/cardapioLoja/{id_loja}', [ProdutoController::class, 'listarProdutosLojaCliente']);//Pegar produtos de uma loja por id
     Route::post('/cardapioLojaPesquisa/{id_loja}', [ProdutoController::class, 'listarProdutosLojaClientePesquisa']);//Pegar produtos de uma loja por id
+
+    //Rotas voltadas para manipulação dos carrinhos
+    Route::post('/adicionarCarrinho', [CarrinhoController::class, 'adicionarAoCarrinho']);
+    Route::put('/modificarCarrinho', [CarrinhoController::class, 'modificarCarrinho']);
+    Route::delete('/removerCarrinho/{id}', [CarrinhoController::class, 'removerDoCarrinho']);
+    Route::delete('/esvaziarCarrinho/{id}', [CarrinhoController::class, 'esvaziarCarrinho']);
+    Route::post('/finalizarCarrinho', [CarrinhoController::class, 'finalizarCarrinho']);
+    Route::get('/listarCarrinho', [CarrinhoController::class, 'listarCarrinho']);
 });
 
 //Rotas utilizadas por usuários cliente

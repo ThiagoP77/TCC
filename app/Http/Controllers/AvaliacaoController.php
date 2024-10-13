@@ -277,7 +277,7 @@ class AvaliacaoController extends Controller
 
             } else {
 
-                // Se não há avaliações, definir média como null ou outro valor apropriado
+                //Se não há avaliações, definir média como null ou outro valor apropriado
                 $media = 0;
 
             }

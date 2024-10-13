@@ -74,6 +74,19 @@ class UsuariosTesteSeeder extends Seeder
             ]);
         }
 
+        if(!Usuario::where('email', 'testeloja2@gmail.com')->exists()){//Cria o vendedor de teste 2
+            Usuario::create([
+                'nome' => 'BolsonaroMitoLoja2',
+                'email' => 'testeloja2@gmail.com',
+                'senha' => Hash::make("senha123"),
+                'email_verified_at' => Carbon::now(),
+                'cpf' => '244.462.520-02',
+                'foto_login' => 'storage/imagens_usuarios/imagem_default_usuario.jpg',
+                'id_categoria' => 3,
+                'aceito_admin' => true,
+            ]);
+        }
+
         if(Usuario::where('email', 'testecliente1@gmail.com')->exists()){//Cria o cliente relacionado
             Cliente::create([
                 'id_usuario' => 5,
@@ -107,9 +120,31 @@ class UsuariosTesteSeeder extends Seeder
             ]);
         }
 
+        if(Usuario::where('email', 'testeloja2@gmail.com')->exists()){//Cria o vendedor relacionado
+            Vendedor::create([
+                'id_usuario' => 9,
+                'telefone' => '(27) 99999-8888',
+                'whatsapp' => '(27) 99999-8888',
+                'cnpj' => '73.125.404/0001-84',
+                'descricao' => 3,
+            ]);
+        }
+
         if(Vendedor::where('id', 1)->exists()) {//Cria o endereço relacionado ao vendedor
             EnderecoVendedor::create([
                 "id_vendedor" => 1,
+                "cep" => "29700-020",
+                "logradouro" => "Avenida José Zouain",
+                "bairro" => "Centro",
+                "localidade" => "Colatina",
+                "uf" => "ES",
+                "numero" => "123"
+            ]);
+        }
+
+        if(Vendedor::where('id', 2)->exists()) {//Cria o endereço relacionado ao vendedor
+            EnderecoVendedor::create([
+                "id_vendedor" => 2,
                 "cep" => "29700-020",
                 "logradouro" => "Avenida José Zouain",
                 "bairro" => "Centro",
