@@ -148,7 +148,13 @@ class CarrinhoController extends Controller
                         //Modificações no carrinho
                         $carrinho->qtde = $quantidade + $dadosValidados['qtd'];
                         $carrinho->expires_at = Carbon::now()->addHour();
-                        //$carrinho->total = ($quantidade + $dadosValidados['qtd']) * ($produto->preco_atual);
+                        $carrinho->total = ($quantidade + $dadosValidados['qtd']) * ($produto->preco_atual);
+
+                        //Verifica desconto
+                        if ($produto->desconto > 0) {
+                            $carrinho->desconto = $produto->desconto;
+                        }
+
                         $carrinho->save();
 
                         //Modificações no produto
@@ -229,7 +235,13 @@ class CarrinhoController extends Controller
                     $registro->id_produto = $produto->id;
                     $registro->qtde = $dadosValidados['qtd'];
                     $registro->expires_at = Carbon::now()->addHour();
-                    //$registro->total = ($dadosValidados['qtd']) * ($produto->preco_atual);
+                    $registro->total = ($dadosValidados['qtd']) * ($produto->preco_atual);
+
+                    //Verifica desconto
+                    if ($produto->desconto > 0) {
+                        $registro->desconto = $produto->desconto;
+                    }
+
                     $registro->save();
 
                     //Produto sofre alterações no estoque
@@ -385,7 +397,13 @@ class CarrinhoController extends Controller
                             //Atualiza o carrinho com os dados
                             $carrinho->qtde = $dadosValidados['qtd'];
                             $carrinho->expires_at = Carbon::now()->addHour();
-                            //$carrinho->total = ($dadosValidados['qtd']) * ($produto->preco_atual);
+                            $carrinho->total = ($dadosValidados['qtd']) * ($produto->preco_atual);
+
+                            //Verifica desconto
+                            if ($produto->desconto > 0) {
+                                $carrinho->desconto = $produto->desconto;
+                            }
+
                             $carrinho->save();
 
                             //Atualiza o estoque do produto
@@ -407,7 +425,13 @@ class CarrinhoController extends Controller
                         //Atualiza o carrinho com os dados
                         $carrinho->qtde = $dadosValidados['qtd'];
                         $carrinho->expires_at = Carbon::now()->addHour();
-                        //$carrinho->total = ($dadosValidados['qtd']) * ($produto->preco_atual);
+                        $carrinho->total = ($dadosValidados['qtd']) * ($produto->preco_atual);
+
+                        //Verifica desconto
+                        if ($produto->desconto > 0) {
+                            $carrinho->desconto = $produto->desconto;
+                        }
+
                         $carrinho->save();
 
                         //Atualiza o estoque do produto
@@ -611,13 +635,50 @@ class CarrinhoController extends Controller
         }
     }
 
+    //Rota de listar carrinho do cliente em determinada loja
     public function listarCarrinho (Request $r, $id) {
 
-        try {
+        try {//Testa se tem exceção
 
-        } catch (Exception $e) {
+            //Obtém o usuário autenticado
+            $user = $r->user(); 
 
-            DB::rollback();//Desfaz todas as operações realizadas no banco
+            //Obtém o cliente
+            $cliente = $user->cliente;
+
+            //Obtém o vendedor
+            $vendedor = Vendedor::find($id);
+
+            //Caso o usuário, cliente ou vendedor não sejam encontrados
+            if (!$user || !$cliente || !$vendedor) {
+                return response()->json([
+                    'mensagem' => 'Falha ao encontrar seu usuário ou a loja.'
+                ], 404);
+            }
+
+            //Recupera o carrinho do cliente e da loja
+            $carrinho = Carrinho::where('id_cliente', $cliente->id)
+            ->where('id_vendedor', $id)
+            ->with(['produto' => function($query) {
+                $query->select('id', 'nome', 'descricao', 'imagem_produto');
+            }])
+            ->get(['id_cliente', 'id_vendedor', 'id_produto', 'qtde', 'total', 'desconto', 'expires_at']);
+
+            //Formatar o campo expires_at
+            foreach ($carrinho as $item) {
+                $item->expires_at = Carbon::parse($item->expires_at)->format('H:i:s');
+            }
+
+            //Somar os totais
+            $totalPedido = $carrinho->sum('total');
+
+            //Envia mensagem de sucesso
+            return response()->json([
+                'carrinho' => $carrinho,
+                'total_pedido' => $totalPedido
+            ], 200);
+
+        } catch (Exception $e) {//Captura exceção e envia mensagem de erro
 
                 return response()->json([
                     'mensagem' => 'Erro ao excluir do carrinho.',

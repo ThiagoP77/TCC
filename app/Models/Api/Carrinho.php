@@ -20,6 +20,7 @@ class Carrinho extends Model
         'id_produto',
         'qtde',
         'total',
+        'desconto',
         'expires_at',
         'status',
     ];

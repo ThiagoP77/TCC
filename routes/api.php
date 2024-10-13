@@ -112,12 +112,12 @@ Route::prefix('clientes')->middleware(['auth:sanctum', 'abilities:cliente'])->gr
     Route::post('/cardapioLojaPesquisa/{id_loja}', [ProdutoController::class, 'listarProdutosLojaClientePesquisa']);//Pegar produtos de uma loja por id
 
     //Rotas voltadas para manipulação dos carrinhos
-    Route::post('/adicionarCarrinho', [CarrinhoController::class, 'adicionarAoCarrinho']);
-    Route::put('/modificarCarrinho', [CarrinhoController::class, 'modificarCarrinho']);
-    Route::delete('/removerCarrinho/{id}', [CarrinhoController::class, 'removerDoCarrinho']);
-    Route::delete('/esvaziarCarrinho/{id}', [CarrinhoController::class, 'esvaziarCarrinho']);
-    Route::post('/finalizarCarrinho', [CarrinhoController::class, 'finalizarCarrinho']);
-    Route::get('/listarCarrinho', [CarrinhoController::class, 'listarCarrinho']);
+    Route::post('/adicionarCarrinho', [CarrinhoController::class, 'adicionarAoCarrinho']);//Rota de adicionar produto ao carrinho
+    Route::put('/modificarCarrinho', [CarrinhoController::class, 'modificarCarrinho']);//Rota de modificar quantidade de produto do carrinho
+    Route::delete('/removerCarrinho/{id}', [CarrinhoController::class, 'removerDoCarrinho']);//Rota de remover produto do carrinho
+    Route::delete('/esvaziarCarrinho/{id}', [CarrinhoController::class, 'esvaziarCarrinho']);//Rota de esvaziar carrinho em determinada loja
+    Route::post('/finalizarCarrinho/{id}', [CarrinhoController::class, 'finalizarCarrinho']);//Rota de finalizar carrinho em determinada rota
+    Route::get('/listarCarrinho/{id}', [CarrinhoController::class, 'listarCarrinho']);//Rota de listar carrinho em determinada loja
 });
 
 //Rotas utilizadas por usuários cliente

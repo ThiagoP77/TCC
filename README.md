@@ -2,7 +2,7 @@
 
 * PHP 8.2 ou superior <br>
 * Composer <br><br>
-* Redis-Cli 6.0.16 
+* Redis-Cli 6.0.16 (por enquanto, não)
 ```
 Utilizar o WSL como demonstrado no tutorial: https://www.youtube.com/watch?v=5VZpzwJeMDo
 ```
@@ -15,7 +15,7 @@ Criar banco de dados chamado "tcc" <br>
 
 Instalar as dependências do PHP
 ```
-composer install
+composer install --ignore-platform-reqs
 ```
 
 Gerar a chave no arquivo ".env"
