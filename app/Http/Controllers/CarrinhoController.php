@@ -683,7 +683,7 @@ class CarrinhoController extends Controller
         } catch (Exception $e) {//Captura exceção e envia mensagem de erro
 
                 return response()->json([
-                    'mensagem' => 'Erro ao excluir do carrinho.',
+                    'mensagem' => 'Erro ao listar carrinho.',
                     'erro' => $e->getMessage()
                 ], 400);
 
