@@ -23,8 +23,9 @@ class Pedido extends Model
         'troco',
         'total',
         'endereco_cliente',
-        'aceito_vendedor',
-        'aceito_entregador',
+        'lucro_loja',
+        'lucro_adm',
+        'lucro_entregador',
         'status',
     ];
 

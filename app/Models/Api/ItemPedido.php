@@ -19,6 +19,7 @@ class ItemPedido extends Model
         'id_produto',
         'qtde',
         'preco',
+        'desconto',
     ];
 
     public function pedido()//Estabelecimento de relacionamento com tabela "pedidos"

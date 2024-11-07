@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 
 //Namespaces utilizados
 use App\Models\Api\Carrinho;
+use App\Models\Api\ItemPedido;
+use App\Models\Api\Pedido;
 use App\Models\Api\Produto;
 use App\Models\Api\Vendedor;
 use App\Services\LimparCarrinhosService;
@@ -688,19 +690,167 @@ class CarrinhoController extends Controller
         }
     }
 
+    //Rota de finalizar pedido
     public function finalizarCarrinho (Request $r, $id) {
 
-        try {
+        try {//Testa se tem exceção
 
-        } catch (Exception $e) {
+            //Realiza a validação dos dados recebidos no request
+            $validator = Validator::make($r->all(), [
+
+                'metodo_pagamento' => [
+                    'required', 
+                    'integer', 
+                    'between:1,10',
+                ],
+
+                'precisa_troco' => [
+                    'required', 
+                    'boolean',
+                ],
+
+                'valor_informado' => [
+                    'numeric',          
+                ],
+
+                'endereco_cliente' => [
+                    'required', 
+                    'string',
+                ]
+
+            ], [//Mensagens enviadas no caso de cada erro
+
+                'metodo_pagamento.required' => 'O metodo de pagamento é obrigatório.',
+                'metodo_pagamento.integer' => 'O metodo de pagamento deve ser um número.',
+                'metodo_pagamento.between' => 'O metodo de pagamento é inválido.',
+                'precisa_troco.required' => 'O campo de troco deve ser preenchido.',
+                'precisa_troco.boolean' => 'O campo de troco é inválido.',
+                'valor_informado.numeric' => 'O valor informado é inválido.',
+                'endereco_cliente.required' => 'O endereço deve ser informado.',
+                'endereco_cliente.string' => 'O endereço é inválido.',
+
+            ]);
+    
+            //Se a validação der alguma falha, envia mensagem de erro
+            if ($validator->fails()) {
+                return response()->json([
+                    'errors' => $validator->errors()
+                ], 422);
+            }
+
+            //Recebe os dados validados
+            $dadosValidados = $validator->validated();
+
+            //Obtém o usuário autenticado
+            $user = $r->user(); 
+
+            //Obtém o cliente
+            $cliente = $user->cliente;
+
+            //Obtém o vendedor
+            $loja = Vendedor::find($id);
+
+            //Verifica se o usuário, o cliente e a loja existem
+            if (!$user || !$cliente || !$loja) {
+                return response()->json([
+                    'mensagem' => 'Falha ao identificar usuários.',
+                ], 404);
+            }
+
+            //Obtém o usuário da loja
+            $userl = $loja->usuario;
+
+            //Verifica se a loja está desativada
+            if ($userl->status == 'desativado') {
+                return response()->json([
+                    'mensagem' => 'Falha no processo, a loja está desativada.',
+                ], 400);
+            }
+    
+            //Verifica se precisa de troco e se o pagamento vai ser em dinheiro
+            if ($dadosValidados['metodo_pagamento'] != 1 && $dadosValidados['precisa_troco'] == true) {
+                return response()->json([
+                    'mensagem' => 'A opção de troco só é válida para compras em dinheiro.'
+                ], 400);
+            }
+
+            //Verifica se o cliente tem um carrinho com produtos
+            $carrinho = Carrinho::where('id_cliente', $cliente->id)
+            ->where('id_vendedor', $loja->id)
+            ->get();
+
+            //Envia mensagem de erro caso o carrinho esteja vazio
+            if (!$carrinho) {
+                return response()->json([
+                    'mensagem' => 'Carrinho vazio ou já finalizado.'
+                ], 404);
+            }
+
+            //Calcula o total do pedido, considerando os descontos
+            $totalPedido = $carrinho->sum('total');
+
+            //Começa a transação
+            DB::beginTransaction();
+
+            //Cria o pedido e insere os dados
+            $pedido = new Pedido();
+            $pedido->id_cliente = $cliente->id;
+            $pedido->id_vendedor = $loja->id;
+            $pedido->id_pagamento = $dadosValidados['metodo_pagamento'];
+            $pedido->precisa_troco = $dadosValidados['precisa_troco'];
+
+            //Caso precise de troco, verifica se o preço informado é maior do que o preço do pedido
+            if ($dadosValidados['precisa_troco'] == true) {
+                if(!isset($dadosValidados['valor_informado']) || $dadosValidados['valor_informado'] < $totalPedido) {
+                    return response()->json([
+                        'mensagem' => 'O valor informado é menor do que o total do pedido ou não foi informado.'
+                    ], 400);
+                } else {
+                    $pedido->troco = $dadosValidados['valor_informado'] - $totalPedido;
+                }
+            }
+            
+            $pedido->total = $totalPedido;
+            $pedido->endereco_cliente = $dadosValidados['endereco_cliente'];
+            $pedido->lucro_adm = 0.03 * $totalPedido;
+            $pedido->lucro_entregador = 0.03 * $totalPedido;
+            $pedido->lucro_loja = $totalPedido - ($pedido->lucro_adm + $pedido->lucro_entregador);
+            $pedido->save();//Salva as alterações
+
+            //Percorre cada item do carrinho, pegando os itens associados aos pedidos
+            foreach ($carrinho as $c) {
+
+                //Associa os itens ao pedido
+                $itemPedido = new ItemPedido();
+                $itemPedido->id_pedido = $pedido->id;
+                $itemPedido->id_produto = $c->id_produto;
+                $itemPedido->qtde = $c->qtde;
+                $itemPedido->preco = $c->total;
+                $itemPedido->desconto = $c->desconto;
+                $itemPedido->save();//Salva as alterações
+
+                $c->delete();//Exclui do carrinho o item
+
+            }
+
+            DB::commit();//Salva as alterações no banco
+
+            //Envia mensagem de sucesso
+            return response()->json([
+                'mensagem' => 'Pedido finalizado com sucesso.',
+            ], 200);
+
+        } catch (Exception $e) {//Captura exceção
 
             DB::rollback();//Desfaz todas as operações realizadas no banco
 
-                return response()->json([
-                    'mensagem' => 'Erro ao excluir do carrinho.',
-                    'erro' => $e->getMessage()
-                ], 400);
+            //Envia mensagem de erro
+            return response()->json([
+                'mensagem' => 'Erro ao finalizar pedido.',
+                'erro' => $e->getMessage()
+            ], 400);
 
         }
     }
+
 }

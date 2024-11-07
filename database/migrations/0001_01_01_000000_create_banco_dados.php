@@ -180,10 +180,10 @@ return new class extends Migration
             $table->boolean('precisa_troco')->default(false);//Bollean de caso precise de troco
             $table->decimal('troco', 5, 2)->default(0.00);//Decimal com o valor do troco
             $table->decimal('total', 10, 2)->check('total >= 0');//Decimal com o valor total do pedido
+            $table->decimal('lucro_loja', 10, 2)->check('total >= 0');//Decimal com o valor total do pedido
+            $table->decimal('lucro_adm', 10, 2)->check('total >= 0');//Decimal com o valor total do pedido
+            $table->decimal('lucro_entregador', 10, 2)->check('total >= 0');//Decimal com o valor total do pedido
             $table->string('endereco_cliente');//String com o endereco do cliente
-            $table->boolean('aceito_vendedor')->default(false);//Boolean para valor true ao ser aceito pelo vendedor
-            $table->boolean('aceito_entregador')->default(false);//Boolean para valor true ao ser aceito pelo entregador
-            $table->timestamp('data_criacao')->default(DB::raw('CURRENT_TIMESTAMP'));//Data de criação
             $table->enum('status', ['Pendente.', 'Aceito pela loja.', 'Aceito para entrega.', 'Entregue.', 'Cancelado.'])->default('Pendente.');//Status possíveis para o pedido
             $table->timestamps();//Data de criação e alteração do registro
 
@@ -198,6 +198,7 @@ return new class extends Migration
             $table->unsignedBigInteger('id_produto');//Chave estrangeira de "produtos"
             $table->unsignedInteger('qtde')->default(1)->check('qtde >= 0');//Integer com a quantidade do produto
             $table->decimal('preco', 10, 2)->check('preco >= 0');//Decimal com o preço
+            $table->decimal('desconto', 5, 2)->default(0.00);//Decimal com o valor do desconto
             $table->timestamps();//Data de criação e alteração do registro
 
             $table->primary(['id_pedido', 'id_produto']);//Chave primária composta por todas as estrangeiras
