@@ -780,7 +780,7 @@ class CarrinhoController extends Controller
             ->get();
 
             //Envia mensagem de erro caso o carrinho esteja vazio
-            if (!$carrinho) {
+            if ($carrinho->isEmpty()) {
                 return response()->json([
                     'mensagem' => 'Carrinho vazio ou já finalizado.'
                 ], 404);
