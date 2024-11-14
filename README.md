@@ -28,15 +28,21 @@ Criação do link simbólico de armazenamento
 php artisan storage:link
 ```
 
-Executar as migration
+Executar as migration / criar o banco de dados (pela primeira vez)
 ```
 php artisan migrate
 ```
 
-Executar as seeders
+Executar as seeders / preencher o banco de dados
 ```
 php artisan db:seed
 ```
+
+Executar as migration de novo / recriar o banco de dados (terá que preencher de novo)
+```
+php artisan migrate:fresh
+```
+
 ## Comandos para rodar o projeto baixado
 
 Em um terminal, iniciar o projeto criado com Laravel
@@ -44,7 +50,7 @@ Em um terminal, iniciar o projeto criado com Laravel
 php artisan serve
 ```
 
-Em outro terminal, ativar as tarefas definidas pelos Schedules
+Em outro terminal, ativar as tarefas agendadas 
 ```
 php artisan schedule:work
 ```
@@ -53,9 +59,10 @@ Em outro terminal, ativar a fila do jobs
 ```
 php artisan queue:work
 ```
+
 ## Como acessar a API
 
-Para acessar a API, é recomendado utilizar o Insomnia para simular requisições à api
+Para acessar a API, utilize o caminho abaixo
 ```
 http://127.0.0.1:8000/api/
 ```
