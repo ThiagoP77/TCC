@@ -17,4 +17,4 @@ Artisan::command('inspire', function () {
 Schedule::call(new ExcluirTokensExpiradosService)->daily()->at('23:00');
 
 //Comando agendado para excluir os registros expirados na tabela de carrinho
-Schedule::call(new LimparCarrinhosService)->everyTwoMinutes()->name('limpar.carrinhos')->withoutOverlapping();
+Schedule::call(new LimparCarrinhosService)->everyFifteenMinutes()->name('limpar.carrinhos')->withoutOverlapping();

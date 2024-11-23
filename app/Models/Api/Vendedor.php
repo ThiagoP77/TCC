@@ -5,6 +5,7 @@ namespace App\Models\Api;
 
 //Namespaces utilizados
 use App\Models\Api\EnderecoVendedor;
+use App\Models\Api\FraseVendedor;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -51,5 +52,10 @@ class Vendedor extends Model
     public function endereco()//Estabelecimento de relacionamento com tabela "enderecos"
     {
         return $this->hasOne(EnderecoVendedor::class, 'id_vendedor');
+    }
+
+    public function fraseVendedor()//Estabelecimento de relacionamento com tabela "frases_vendedores"
+    {
+        return $this->hasOne(FraseVendedor::class, 'id_vendedor');
     }
 }

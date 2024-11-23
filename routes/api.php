@@ -8,6 +8,7 @@ use App\Http\Controllers\ClienteController;
 use App\Http\Controllers\CoisasUteisController;
 use App\Http\Controllers\EnderecoClienteController;
 use App\Http\Controllers\EntregadorController;
+use App\Http\Controllers\FraseVendedorController;
 use App\Http\Controllers\MetodoPagamentoController;
 use App\Http\Controllers\ProdutoController;
 use App\Http\Controllers\TipoVeiculoController;
@@ -40,6 +41,9 @@ Route::get('/avaliacoesLoja/{id_loja}', [AvaliacaoController::class, 'mediaAvali
 //Rotas gerais de produto
 Route::get('/dadosProduto/{id_produto}', [ProdutoController::class, 'dadosProduto'])->middleware(['auth:sanctum']);//Pegar dados do produto por id
 Route::get('/fotoProduto/{id_produto}', [ProdutoController::class, 'fotoProduto'])->middleware(['auth:sanctum']);//Pegar foto do produto por id
+
+//Rota de exibir a frase de um vendedor
+Route::get('/exibirFrase/{id}', [FraseVendedorController::class, 'exibirFrase'])->middleware(['auth:sanctum']);//Pegar dados do produto por id
 
 //Rotas com funções básicas de usuário
 Route::prefix('usuarios')->group(function () {
@@ -135,6 +139,10 @@ Route::prefix('vendedores')->middleware(['auth:sanctum', 'abilities:vendedor'])-
     //Rotas de manipulação de desconto
     Route::post('/aplicarDesconto/{id}', [ProdutoController::class, 'aplicarDesconto']);//Colocar ou alterar desconto
     Route::delete('/tirarDesconto/{id}', [ProdutoController::class, 'tirarDesconto']);//Excluir desconto
+
+    //Rotas de manipulação das frases dos vendedores
+    Route::post('/novaFrase', [FraseVendedorController::class, 'novaFrase']);//Adicionar ou allterar a frase do vendedor
+    Route::delete('/excluirFrase', [FraseVendedorController::class, 'excluirFrase']);//Excluir a frase do vendedor
 });
 
 //Modelo de teste  

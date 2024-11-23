@@ -106,6 +106,15 @@ return new class extends Migration
             $table->foreign('id_vendedor')->references('id')->on('vendedores')->onDelete('cascade');//Cria o relacionamento entre as tabelas (caso tenha registro, a exclusão é cascade)
         });
 
+        Schema::create('frases_vendedores', function (Blueprint $table) {//Tabela com as frases dos vendedores
+            $table->id();//Chave primária id
+            $table->unsignedBigInteger('id_vendedor');//Chave estrangeira de "vendedores"
+            $table->string('frase')->default("");//String com a frase em questão
+            $table->timestamps();//Data de criação e alteração do registro
+
+            $table->foreign('id_vendedor')->references('id')->on('vendedores')->onDelete('cascade');//Cria o relacionamento entre as tabelas (caso tenha registro, a exclusão é cascade)
+        });
+
         Schema::create('admins', function (Blueprint $table) {//Tabela de admins
             $table->id();//Chave primária id
             $table->unsignedBigInteger('id_usuario');//Chave estrangeira de "usuarios"
