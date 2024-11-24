@@ -4,6 +4,9 @@
 namespace App\Http\Controllers;
 
 //Namespaces utilizados
+
+use App\Models\Api\Entregador;
+use App\Models\Api\Pedido;
 use App\Models\Api\Usuario;
 use Exception;
 use Illuminate\Http\JsonResponse;
@@ -110,6 +113,41 @@ class EntregadorController extends Controller
                 'mensagem' => 'Falha ao carregar os entregadores.',
                 'erro' => $e->getMessage()
             ], 400);
+
+        }
+    }
+
+    //Rota de mostrar o número de pedidos finalizados por um entregador
+    public function numeroEntrega ($id) {
+
+        try {//Testa se tem exceção
+
+            //Obtém o entregador pelo ID fornecido
+            $entregador = Entregador::find($id); 
+
+            //Caso o entregador não seja encontrado
+            if (!$entregador) {
+                return response()->json([
+                    'mensagem' => 'Falha ao encontrar o entregador informado.'
+                ], 404);
+            }
+
+            //Recupera a contagem de pedidos finalizados por ele 
+            $pedidos = Pedido::where('id_entregador', $entregador->id)
+            ->where('status', 'Entregue.')
+            ->count();
+
+            //Envia mensagem de sucesso
+            return response()->json([
+                'quantidade' => $pedidos,
+            ], 200);
+
+        } catch (Exception $e) {//Captura exceção e envia mensagem de erro
+
+                return response()->json([
+                    'mensagem' => 'Erro ao informar a quantidade de entregas finalizadas.',
+                    'erro' => $e->getMessage()
+                ], 400);
 
         }
     }

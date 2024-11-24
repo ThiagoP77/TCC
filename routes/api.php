@@ -10,6 +10,7 @@ use App\Http\Controllers\EnderecoClienteController;
 use App\Http\Controllers\EntregadorController;
 use App\Http\Controllers\FraseVendedorController;
 use App\Http\Controllers\MetodoPagamentoController;
+use App\Http\Controllers\PedidoController;
 use App\Http\Controllers\ProdutoController;
 use App\Http\Controllers\TipoVeiculoController;
 use App\Http\Controllers\UsuarioController;
@@ -44,6 +45,9 @@ Route::get('/fotoProduto/{id_produto}', [ProdutoController::class, 'fotoProduto'
 
 //Rota de exibir a frase de um vendedor
 Route::get('/exibirFrase/{id}', [FraseVendedorController::class, 'exibirFrase'])->middleware(['auth:sanctum']);//Pegar dados do produto por id
+
+//Rota de exibir pedido de um vendedor
+Route::get('/dadosPedido/{id}', [PedidoController::class, 'dadosPedido'])->middleware(['auth:sanctum']);//Pegar dados do pedido por id
 
 //Rotas com funções básicas de usuário
 Route::prefix('usuarios')->group(function () {
@@ -90,8 +94,15 @@ Route::prefix('admins')->middleware(['auth:sanctum', 'abilities:admin'])->group(
     Route::get('/listarVendedores', [VendedorController::class, 'listarVendedoresAdmin']);//Rota de listar os vendedores do site
     Route::post('/listarVendedoresPesquisa', [VendedorController::class, 'listarVendedoresAdminPesquisa']);//Rota de listar os vendedores do site
     
+    //Rotas de verificação de loja
     Route::get('/cardapioLoja/{id_loja}', [ProdutoController::class, 'listarProdutosLoja']);//Pegar produtos de uma loja por id
     Route::post('/cardapioLojaPesquisa/{id_loja}', [ProdutoController::class, 'listarProdutosLojaPesquisa']);//Pegar produtos de uma loja por id
+    
+    //Rotas de verificação de pedido
+    Route::get('/pedidos/{id_usuario}/{tipo}', [PedidoController::class, 'pedidosAdm']);//Pegar pedidos associados a um usuário
+
+    //Rotas de verificação de entrega
+    Route::get('/numeroEntregas/{id_entregador}', [EntregadorController::class, 'numeroEntrega']);//Pegar número de entregas finalizadas por um entregador
 });
 
 //Rotas utilizadas por usuários cliente
@@ -122,9 +133,13 @@ Route::prefix('clientes')->middleware(['auth:sanctum', 'abilities:cliente'])->gr
     Route::delete('/esvaziarCarrinho/{id}', [CarrinhoController::class, 'esvaziarCarrinho']);//Rota de esvaziar carrinho em determinada loja
     Route::post('/finalizarCarrinho/{id}', [CarrinhoController::class, 'finalizarCarrinho']);//Rota de finalizar carrinho em determinada rota
     Route::get('/listarCarrinho/{id}', [CarrinhoController::class, 'listarCarrinho']);//Rota de listar carrinho em determinada loja
+
+    //Rotas de manipular pedidos
+    Route::get('/pedidos/{tipo}', [PedidoController::class, 'pedidosCliente']);//Mostra pedidos pendentes
+    Route::delete('/cancelarPedido/{id}', [PedidoController::class, 'cancelarPedido']);//Rota de cancelar pedido pendente
 });
 
-//Rotas utilizadas por usuários cliente
+//Rotas utilizadas por usuários vendedores
 Route::prefix('vendedores')->middleware(['auth:sanctum', 'abilities:vendedor'])->group(function () {
 
     //Rotas de manipulação de produto
@@ -143,6 +158,21 @@ Route::prefix('vendedores')->middleware(['auth:sanctum', 'abilities:vendedor'])-
     //Rotas de manipulação das frases dos vendedores
     Route::post('/novaFrase', [FraseVendedorController::class, 'novaFrase']);//Adicionar ou allterar a frase do vendedor
     Route::delete('/excluirFrase', [FraseVendedorController::class, 'excluirFrase']);//Excluir a frase do vendedor
+
+    //Rotas de manipulação de pedidos
+    Route::get('/pedidos/{tipo}', [PedidoController::class, 'pedidosLoja']);//Mostrar pedidos pendentes
+    Route::put('/aceitarPedido/{id}', [PedidoController::class, 'aceitarPedidoLoja']);//Aceitar pedido pendente
+    Route::delete('/recusarPedido/{id}', [PedidoController::class, 'recusarPedidoLoja']);//Recusar pedido pendente
+});
+
+//Rotas utilizadas por usuários entregadores
+Route::prefix('entregadores')->middleware(['auth:sanctum', 'abilities:entregador'])->group(function () {
+
+    //Rotas de manipulação de pedidos
+    Route::get('/pedidosDisponiveis', [PedidoController::class, 'aceitosGeral']);//Mostra pedidos aceitos pela loja
+    Route::put('/aceitarPedido/{id}', [PedidoController::class, 'aceitarPedidoEntregador']);//Aceita pedido para entrega
+    Route::get('/pedidos/{tipo}', [PedidoController::class, 'pedidosEntregador']);//Mostra pedidos aceitos para entrega
+    Route::put('/marcarEntregue/{id}', [PedidoController::class, 'marcarEntregue']);//Marca pedido como entregue
 });
 
 //Modelo de teste  

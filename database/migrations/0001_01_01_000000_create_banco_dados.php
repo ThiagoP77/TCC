@@ -193,7 +193,7 @@ return new class extends Migration
             $table->decimal('lucro_adm', 10, 2)->check('total >= 0');//Decimal com o valor total do pedido
             $table->decimal('lucro_entregador', 10, 2)->check('total >= 0');//Decimal com o valor total do pedido
             $table->string('endereco_cliente');//String com o endereco do cliente
-            $table->enum('status', ['Pendente.', 'Aceito pela loja.', 'Aceito para entrega.', 'Entregue.', 'Cancelado.'])->default('Pendente.');//Status possíveis para o pedido
+            $table->enum('status', ['Pendente.', 'Aceito pela loja.', 'Aceito para entrega.', 'Entregue.', 'Cancelado.', 'Recusado.'])->default('Pendente.');//Status possíveis para o pedido
             $table->timestamps();//Data de criação e alteração do registro
 
             $table->foreign('id_cliente')->references('id')->on('clientes')->onDelete('cascade');//Cria o relacionamento entre as tabelas (caso tenha registro, a exclusão é cascade)
@@ -203,14 +203,13 @@ return new class extends Migration
         });
 
         Schema::create('itens_pedidos', function (Blueprint $table) {//Tabela de itens do pedido
+            $table->id();//Chave primária id
             $table->unsignedBigInteger('id_pedido');//Chave estrangeira de "pedidos"
             $table->unsignedBigInteger('id_produto');//Chave estrangeira de "produtos"
             $table->unsignedInteger('qtde')->default(1)->check('qtde >= 0');//Integer com a quantidade do produto
             $table->decimal('preco', 10, 2)->check('preco >= 0');//Decimal com o preço
             $table->decimal('desconto', 5, 2)->default(0.00);//Decimal com o valor do desconto
             $table->timestamps();//Data de criação e alteração do registro
-
-            $table->primary(['id_pedido', 'id_produto']);//Chave primária composta por todas as estrangeiras
 
             $table->foreign('id_pedido')->references('id')->on('pedidos')->onDelete('cascade');//Cria o relacionamento entre as tabelas (caso tenha registro, a exclusão é cascade)
             $table->foreign('id_produto')->references('id')->on('produtos')->onDelete('cascade');//Cria o relacionamento entre as tabelas (caso tenha registro, a exclusão é cascade)
@@ -242,6 +241,7 @@ return new class extends Migration
         Schema::dropIfExists('usuarios');
         Schema::dropIfExists('clientes');
         Schema::dropIfExists('enderecos_clientes');
+        Schema::dropIfExists('frases_vendedores');
         Schema::dropIfExists('enderecos_vendedores');
         Schema::dropIfExists('vendedores');
         Schema::dropIfExists('admins');
