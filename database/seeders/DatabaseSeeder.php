@@ -22,6 +22,8 @@ class DatabaseSeeder extends Seeder
         $this->call(UsuariosTesteSeeder::class);//Roda a seed UsuariosTesteSeeder
         $this->call(AdminsSeeder::class);//Roda a seed AdminsSeeder
         $this->call(ProdutosTesteSeeder::class);//Roda a seed ProdutosTesteSeeder
+        $this->call(PedidosSeeder::class);//Roda a seed PedidosSeeder
+        $this->call(ItemPedidoSeeder::class);//Roda a seed ItemPedidoSeeder
         
         // User::factory(10)->create();
 
