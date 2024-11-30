@@ -135,7 +135,8 @@ Route::prefix('clientes')->middleware(['auth:sanctum', 'abilities:cliente'])->gr
     Route::get('/listarCarrinho/{id}', [CarrinhoController::class, 'listarCarrinho']);//Rota de listar carrinho em determinada loja
 
     //Rotas de manipular pedidos
-    Route::get('/pedidos/{tipo}', [PedidoController::class, 'pedidosCliente']);//Mostra pedidos pendentes
+    Route::get('/pedidos/{tipo}', [PedidoController::class, 'pedidosCliente']);//Mostra pedidos por tipo
+    Route::get('/pedidos', [PedidoController::class, 'pedidosClienteT']);//Mostra pedidos
     Route::delete('/cancelarPedido/{id}', [PedidoController::class, 'cancelarPedido']);//Rota de cancelar pedido pendente
 });
 
@@ -160,7 +161,8 @@ Route::prefix('vendedores')->middleware(['auth:sanctum', 'abilities:vendedor'])-
     Route::delete('/excluirFrase', [FraseVendedorController::class, 'excluirFrase']);//Excluir a frase do vendedor
 
     //Rotas de manipulação de pedidos
-    Route::get('/pedidos/{tipo}', [PedidoController::class, 'pedidosLoja']);//Mostrar pedidos pendentes
+    Route::get('/pedidos/{tipo}', [PedidoController::class, 'pedidosLoja']);//Mostrar pedidos por tipo
+    Route::get('/pedidos', [PedidoController::class, 'pedidosLojaT']);//Mostrar pedidos da loja
     Route::put('/aceitarPedido/{id}', [PedidoController::class, 'aceitarPedidoLoja']);//Aceitar pedido pendente
     Route::delete('/recusarPedido/{id}', [PedidoController::class, 'recusarPedidoLoja']);//Recusar pedido pendente
 });
@@ -171,7 +173,8 @@ Route::prefix('entregadores')->middleware(['auth:sanctum', 'abilities:entregador
     //Rotas de manipulação de pedidos
     Route::get('/pedidosDisponiveis', [PedidoController::class, 'aceitosGeral']);//Mostra pedidos aceitos pela loja
     Route::put('/aceitarPedido/{id}', [PedidoController::class, 'aceitarPedidoEntregador']);//Aceita pedido para entrega
-    Route::get('/pedidos/{tipo}', [PedidoController::class, 'pedidosEntregador']);//Mostra pedidos aceitos para entrega
+    Route::get('/pedidos/{tipo}', [PedidoController::class, 'pedidosEntregador']);//Mostra pedidos por tipo
+    Route::get('/pedidos', [PedidoController::class, 'pedidosEntregadorT']);//Mostra pedidos
     Route::put('/marcarEntregue/{id}', [PedidoController::class, 'marcarEntregue']);//Marca pedido como entregue
 });
 

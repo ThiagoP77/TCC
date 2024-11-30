@@ -158,6 +158,85 @@ class PedidoController extends Controller
         }
     }
 
+    //Rota de listar pedidos para o vendedor
+    public function pedidosLojaT (Request $r) {
+
+        try {//Testa se tem exceção
+        
+            //Obtém o usuário autenticado
+            $user = $r->user(); 
+    
+            //Obtém o vendedor
+            $vendedor = $user->vendedor;
+    
+            //Caso o usuário ou vendedor não sejam encontrados
+            if (!$user || !$vendedor) {
+                return response()->json([
+                    'mensagem' => 'Falha ao encontrar seu usuário ou a loja.'
+                ], 404);
+            }
+    
+            //Recupera os pedidos e demais dados importantes 
+            $pedidosQuery = Pedido::where('id_vendedor', $vendedor->id)
+            ->with(['cliente' => function($query) {
+                $query->select('id', 'telefone', 'id_usuario')
+                ->with(['usuario' => function ($subQuery) {
+                    $subQuery->select('id', 'nome');
+                }]);
+            }])
+            ->with(['vendedor' => function($query) {
+                $query->select('id', 'telefone', 'whatsapp', 'id_usuario')
+                ->with(['usuario' => function ($subQuery) {
+                    $subQuery->select('id', 'nome');
+                }])
+                ->with(['endereco' => function ($subQuery) {
+                    $subQuery->select('id', 'id_vendedor', 'cep', 'logradouro', 'bairro', 'localidade', 'uf', 'numero');
+                }]);
+            }])
+            ->with(['metodoPagamento' => function($query) {
+                $query->select('id', 'nome');
+            }])
+            ->with(['itens' => function($query) {
+                $query->select('id_pedido', 'id_produto', 'qtde', 'preco', 'desconto')
+                ->with(['produto' => function ($subQuery) {
+                    $subQuery->select('id', 'nome', 'descricao', 'imagem_produto');
+                }]);;
+            }])
+            ->orderBy('updated_at', 'desc');
+
+            //Recupera dados importantes
+            $pedidos = $pedidosQuery->get(['id', 'id_cliente', 'id_pagamento', 'id_vendedor', 'id_entregador', 'status', 'precisa_troco', 'troco', 'total', 'lucro_loja', 'lucro_adm', 'lucro_entregador', 'endereco_cliente']);
+
+            //Adiciona a relação 'entregador' se o status for "Aceito para entrega." ou "Entregue."
+            foreach ($pedidos as $pedido) {
+                if ($pedido->status == "Aceito para entrega." || $pedido->status == "Entregue.") {
+                    $pedido->load(['entregador' => function($query) {
+                        $query->select('id', 'telefone', 'placa', 'id_tipo_veiculo', 'id_usuario')
+                            ->with(['usuario' => function ($subQuery) {
+                                $subQuery->select('id', 'nome');
+                            }])
+                            ->with(['tipoVeiculo' => function ($subQuery) {
+                                $subQuery->select('id', 'nome');
+                            }]);
+                    }]);
+                } else {//Caso não seja, retira o id_entregador da respota
+                    $pedido->makeHidden('id_entregador');
+                }
+            }
+     
+            //Envia mensagem de sucesso
+            return response()->json($pedidos, 200);
+        
+        } catch (Exception $e) {//Captura exceção e envia mensagem de erro
+        
+                return response()->json([
+                    'mensagem' => 'Erro ao listar pedidos.',
+                    'erro' => $e->getMessage()
+                ], 400);
+        
+        }
+    }
+
     //Aceitar pedido por id
     public function aceitarPedidoLoja (Request $r, $id) {
         try {//Testa se tem exceção
@@ -470,6 +549,85 @@ class PedidoController extends Controller
         }
     }
 
+    //Rota de listar pedidos para o cliente
+    public function pedidosClienteT (Request $r) {
+
+        try {//Testa se tem exceção
+        
+            //Obtém o usuário autenticado
+            $user = $r->user(); 
+        
+            //Obtém o cliente
+            $cliente = $user->cliente;
+        
+            //Caso o usuário ou cliente não sejam encontrados
+            if (!$user || !$cliente) {
+                return response()->json([
+                    'mensagem' => 'Falha ao encontrar seu usuário.'
+                ], 404);
+            }
+    
+            //Recupera os pedidos e demais dados importantes 
+            $pedidosQuery = Pedido::where('id_cliente', $cliente->id)
+            ->with(['cliente' => function($query) {
+                $query->select('id', 'telefone', 'id_usuario')
+                ->with(['usuario' => function ($subQuery) {
+                    $subQuery->select('id', 'nome');
+                }]);
+            }])
+            ->with(['vendedor' => function($query) {
+                $query->select('id', 'telefone', 'whatsapp', 'id_usuario')
+                ->with(['usuario' => function ($subQuery) {
+                    $subQuery->select('id', 'nome');
+                }])
+                ->with(['endereco' => function ($subQuery) {
+                    $subQuery->select('id', 'id_vendedor', 'cep', 'logradouro', 'bairro', 'localidade', 'uf', 'numero');
+                }]);
+            }])
+            ->with(['metodoPagamento' => function($query) {
+                $query->select('id', 'nome');
+            }])
+            ->with(['itens' => function($query) {
+                $query->select('id_pedido', 'id_produto', 'qtde', 'preco', 'desconto')
+                ->with(['produto' => function ($subQuery) {
+                    $subQuery->select('id', 'nome', 'descricao', 'imagem_produto');
+                }]);;
+            }])
+            ->orderBy('updated_at', 'desc');
+
+            //Recupera dados importantes
+            $pedidos = $pedidosQuery->get(['id', 'id_cliente', 'id_pagamento', 'id_vendedor', 'id_entregador', 'status', 'precisa_troco', 'troco', 'total', 'lucro_loja', 'lucro_adm', 'lucro_entregador', 'endereco_cliente']);
+
+            //Adiciona a relação 'entregador' se o status for "Aceito para entrega." ou "Entregue."
+            foreach ($pedidos as $pedido) {
+                if ($pedido->status == "Aceito para entrega." || $pedido->status == "Entregue.") {
+                    $pedido->load(['entregador' => function($query) {
+                        $query->select('id', 'telefone', 'placa', 'id_tipo_veiculo', 'id_usuario')
+                            ->with(['usuario' => function ($subQuery) {
+                                $subQuery->select('id', 'nome');
+                            }])
+                            ->with(['tipoVeiculo' => function ($subQuery) {
+                                $subQuery->select('id', 'nome');
+                            }]);
+                    }]);
+                } else {//Caso não seja, retira o id_entregador da respota
+                    $pedido->makeHidden('id_entregador');
+                }
+            }
+     
+            //Envia mensagem de sucesso
+            return response()->json($pedidos, 200);
+        
+        } catch (Exception $e) {//Captura exceção e envia mensagem de erro
+        
+                return response()->json([
+                    'mensagem' => 'Erro ao listar pedidos.',
+                    'erro' => $e->getMessage()
+                ], 400);
+        
+        }
+    }
+
     //Cancelar pedido por id
     public function cancelarPedido (Request $r, $id) {
         try {//Testa se tem exceção
@@ -753,9 +911,9 @@ class PedidoController extends Controller
                 $query->select('id_pedido', 'id_produto', 'qtde', 'preco', 'desconto')
                 ->with(['produto' => function ($subQuery) {
                     $subQuery->select('id', 'nome', 'descricao', 'imagem_produto');
-                }]);;
+                }]);
             }])
-            ->orderBy('updated_at', 'asc')
+            ->orderBy('updated_at', 'desc')
             ->get(['id', 'id_cliente', 'id_pagamento', 'id_vendedor', 'id_entregador', 'status', 'precisa_troco', 'troco', 'total', 'lucro_loja', 'lucro_adm', 'lucro_entregador', 'endereco_cliente']);
 
             //Envia mensagem de sucesso
@@ -768,6 +926,75 @@ class PedidoController extends Controller
                     'erro' => $e->getMessage()
                 ], 400);
 
+        }
+    }
+
+    //Rota de listar pedidos para o entregador
+    public function pedidosEntregadorT (Request $r) {
+
+        try {//Testa se tem exceção
+        
+            //Obtém o usuário autenticado
+            $user = $r->user(); 
+
+            //Obtém o entregador
+            $entregador = $user->entregador;
+
+            //Caso o usuário ou entregador não sejam encontrados
+            if (!$user || !$entregador) {
+                return response()->json([
+                    'mensagem' => 'Falha ao encontrar seu usuário.'
+                ], 404);
+            }
+    
+            //Recupera os pedidos e demais dados importantes 
+            $pedidos = Pedido::where('id_entregador', $entregador->id)
+            ->with(['cliente' => function($query) {
+                $query->select('id', 'telefone', 'id_usuario')
+                ->with(['usuario' => function ($subQuery) {
+                    $subQuery->select('id', 'nome');
+                }]);
+            }])
+            ->with(['vendedor' => function($query) {
+                $query->select('id', 'telefone', 'whatsapp', 'id_usuario')
+                ->with(['usuario' => function ($subQuery) {
+                    $subQuery->select('id', 'nome');
+                }])
+                ->with(['endereco' => function ($subQuery) {
+                    $subQuery->select('id', 'id_vendedor', 'cep', 'logradouro', 'bairro', 'localidade', 'uf', 'numero');
+                }]);
+            }])
+            ->with(relations: ['entregador' => function($query) {
+                $query->select('id', 'telefone', 'placa', 'id_tipo_veiculo', 'id_usuario')
+                ->with(['usuario' => function ($subQuery) {
+                    $subQuery->select('id', 'nome');
+                }])
+                ->with(['tipoVeiculo' => function ($subQuery) {
+                    $subQuery->select('id', 'nome');
+                }]);
+            }])
+            ->with(['metodoPagamento' => function($query) {
+                $query->select('id', 'nome');
+            }])
+            ->with(['itens' => function($query) {
+                $query->select('id_pedido', 'id_produto', 'qtde', 'preco', 'desconto')
+                ->with(['produto' => function ($subQuery) {
+                    $subQuery->select('id', 'nome', 'descricao', 'imagem_produto');
+                }]);;
+            }])
+            ->orderBy('updated_at', 'desc')
+            ->get(['id', 'id_cliente', 'id_pagamento', 'id_vendedor', 'id_entregador', 'status', 'precisa_troco', 'troco', 'total', 'lucro_loja', 'lucro_adm', 'lucro_entregador', 'endereco_cliente']);
+     
+            //Envia mensagem de sucesso
+            return response()->json($pedidos, 200);
+        
+        } catch (Exception $e) {//Captura exceção e envia mensagem de erro
+        
+                return response()->json([
+                    'mensagem' => 'Erro ao listar pedidos.',
+                    'erro' => $e->getMessage()
+                ], 400);
+        
         }
     }
 
