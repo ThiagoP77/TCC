@@ -13,6 +13,7 @@ use App\Services\LimparCarrinhosService;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
@@ -693,6 +694,10 @@ class CarrinhoController extends Controller
     //Rota de finalizar pedido
     public function finalizarCarrinho (Request $r, $id) {
 
+        //Geração de um lock para impedir a limpeza de carrinho enquanto o processo de finalização ocorre
+        $lockC = 'lock';
+        Cache::put($lockC, true, 15);
+
         try {//Testa se tem exceção
 
             //Realiza a validação dos dados recebidos no request
@@ -834,6 +839,7 @@ class CarrinhoController extends Controller
             }
 
             DB::commit();//Salva as alterações no banco
+            Cache::forget($lockC);//Remove o lock
 
             //Envia mensagem de sucesso
             return response()->json([
@@ -843,6 +849,7 @@ class CarrinhoController extends Controller
         } catch (Exception $e) {//Captura exceção
 
             DB::rollback();//Desfaz todas as operações realizadas no banco
+            Cache::forget($lockC);//Remove o lock
 
             //Envia mensagem de erro
             return response()->json([

@@ -5,7 +5,9 @@ namespace App\Services;
 use App\Models\Api\Carrinho;
 use App\Models\Api\Produto;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class LimparCarrinhosService
 {
@@ -14,41 +16,48 @@ class LimparCarrinhosService
     public function __invoke() 
     {
 
-        //Define a data limite para exclusão
-        $dataLimite = Carbon::now();
+        //Verifica se há um lock para impedir o processo
+        if (Cache::has('lock')) {
 
-        //Obtém todos os registros do carrinho
-        $carrinhos = Carrinho::all();
-
-        foreach ($carrinhos as $carrinho) {
+            //Log::info('Processo interrompido.');
             
-            //Obtém o produto associado ao carrinho
-            $produto = Produto::find($carrinho->id_produto);
-            
-            //Exclui o carrinho se o produto estiver desativado
-            if ($produto && $produto->status == 'desativado') {
-                $produto->qtde_estoque += $carrinho->qtde;
-                $produto->save();
+        } else {
 
-                $carrinho->delete();
+            //Define a data limite para exclusão
+            $dataLimite = Carbon::now();
 
-                continue;
-            }
+            //Obtém todos os registros do carrinho
+            $carrinhos = Carrinho::all();
 
-            //Verifica se o carrinho está expirado
-            if ($carrinho->expires_at <= $dataLimite) {
-
-                //Se o carrinho está expirado e o produto existe, devolve a quantidade ao estoque
-                if ($produto) {
+            foreach ($carrinhos as $carrinho) {
+                
+                //Obtém o produto associado ao carrinho
+                $produto = Produto::find($carrinho->id_produto);
+                
+                //Exclui o carrinho se o produto estiver desativado
+                if ($produto && $produto->status == 'desativado') {
                     $produto->qtde_estoque += $carrinho->qtde;
                     $produto->save();
+
+                    $carrinho->delete();
+
+                    continue;
                 }
 
-                //Exclui o registro do carrinho
-                $carrinho->delete();
+                //Verifica se o carrinho está expirado
+                if ($carrinho->expires_at <= $dataLimite) {
+
+                    //Se o carrinho está expirado e o produto existe, devolve a quantidade ao estoque
+                    if ($produto) {
+                        $produto->qtde_estoque += $carrinho->qtde;
+                        $produto->save();
+                    }
+
+                    //Exclui o registro do carrinho
+                    $carrinho->delete();
+                }
             }
         }
- 
     }
 
     //Limpar carrinhos expirados de clientes específicos
