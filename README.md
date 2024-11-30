@@ -1,8 +1,15 @@
+## Descrição da API
+
+Disponível em:
+```
+https://docs.google.com/document/d/17Zx_dkY4cznlRPmKFjBSh4Ial_KhKQsLubPIg4MIjs0/edit?usp=sharing
+```
+
 ## Requisitos
 
 * PHP 8.2 ou superior <br>
 * Composer <br><br>
-* Redis-Cli 6.0.16 (por enquanto, não)
+* Redis-Cli 6.0.16
 ```
 Utilizar o WSL como demonstrado no tutorial: https://www.youtube.com/watch?v=5VZpzwJeMDo
 ```
