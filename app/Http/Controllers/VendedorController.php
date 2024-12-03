@@ -186,11 +186,11 @@ class VendedorController extends Controller
                 $query->where('nome', 'like', "%$q%"); // Filtro por nome
             })  
             ->with(['vendedor' => function($query) {
-                $query->select('id','id_usuario', 'telefone', 'whatsapp', 'cnpj', 'descricao')
+                $query->select('id','id_usuario', 'telefone', 'whatsapp', 'descricao')
                       ->with('endereco:id_vendedor,cep,logradouro,bairro,localidade,uf,numero');
             }])
     
-            ->select('id', 'nome', 'email', 'cpf', 'foto_login')
+            ->select('id', 'nome', 'email', 'foto_login')
             ->orderBy('id')
             ->get();
 
@@ -241,11 +241,11 @@ class VendedorController extends Controller
             ->where('aceito_admin', 1)
             ->where('status', 'ativo')
             ->with(['vendedor' => function($query) {
-                $query->select('id','id_usuario', 'telefone', 'whatsapp', 'cnpj', 'descricao')
+                $query->select('id','id_usuario', 'telefone', 'whatsapp', 'descricao')
                       ->with('endereco:id_vendedor,cep,logradouro,bairro,localidade,uf,numero');
             }])
     
-            ->select('id', 'nome', 'email', 'cpf', 'foto_login')
+            ->select('id', 'nome', 'email', 'foto_login')
             ->orderBy('id')
             ->get();
 
