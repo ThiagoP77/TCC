@@ -1,5 +1,9 @@
 ## Descrição da API
 
+API de um sistema de e-commerce de doces, desenvolvida como TCC de curso técnico em informática.
+
+## Descrição de Rotas da API
+
 Disponível em:
 ```
 https://docs.google.com/document/d/17Zx_dkY4cznlRPmKFjBSh4Ial_KhKQsLubPIg4MIjs0/edit?usp=sharing
